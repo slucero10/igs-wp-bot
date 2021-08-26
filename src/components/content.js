@@ -142,7 +142,7 @@ export async function generar_pdf(user, info, id, name) {
 
   let html = readFileSync(info.html_path, 'utf8');
   let URL = info.url_accept_assistance + user; //user
-  if (info.name == 'Farmaenlace') {
+  if (info.name === 'FEMedicity' || info.name === 'FEFarmaciasEconomicas') {
     URL = URL + '&id_name=' + name;
   }
   let PDF = {
@@ -290,7 +290,7 @@ export function mensaje(coop) {
       '(sin límite en el costo) y mchos beneficios más.';
     return mensaje + mensaje_activacion;
   }
-  if (coop == art_info[6].name + '-' + art_info[6].pdf_name) {
+  if (coop == art_info[7].name + '-' + art_info[7].pdf_name) {
     mensaje =
       'IGS Ecuador con el soporte de Farmacias Económicas' +
       coma[getRandomInt(0, 1)] + 
