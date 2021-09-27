@@ -1,43 +1,39 @@
 import { create } from "venom-bot";
-import randomWords from "random-words";
 import express, { response } from "express";
 import { graphqlHTTP } from "express-graphql";
 import { connect } from "./database.js";
+import { Campaigns } from "./bot/config.js";
 import {
-  //fetchPhones,
-  //fetchLines,
-  fetchBGRClientsTC,
-  createClient,
+  fetchClients,
   updateClient,
-} from "./graphql/query.js";
-import { fetchPhones } from "./graphql/phones/query.js";
+} from "./graphql/clients/query.js";
+import { fetchPhones, checkInDB } from "./graphql/phones/query.js";
+import { fetchCampaign } from "./graphql/campaigns_info/query.js";
 import { LineStatus } from "./graphql/phones/models/Phone.js";
-import schema from "./graphql/phones/schema.js";
-import { serverSchema } from "./graphql/campaigns/bgr/schema.js";
+import phoneSchema from "./graphql/phones/schema.js";
+import { serverSchema } from "./graphql/clients/schema.js";
+import campaignSchema from "./graphql/campaigns_info/schema.js";
 import {
   generar_pdf,
   saludo,
   mensaje,
-  art_info,
-  phoneNames,
-  respuesta,
   getRandomInt,
+  setArtInfo,
+  mensaje_random
 } from "./components/content.js";
+import dontenv from 'dotenv';
+import { sendToDialogFlow } from "./bot/dialogflow.js";
+import { v4 } from "uuid";
 
-//(0) Andalucía
-//(1) Multicoop - Multiayuda
-//(2) Multicoop - Multisalud
-//(3) Santa Rosa
-//(4) BGR - Asistencia Celular Protegido
-//(5) BGR - Asistencia Mascotas
-//(6) FE - Medicity
-//(7) FE - Farmacias Economicas
-const campaign = 0
-const campaign_info = art_info[campaign];
-const activePhones = ["2-A"];
+dontenv.config();
+
+//Inicializar variables del Bot
+const campaign = Campaigns.FARMAENLACEFE;
+const product = campaign.products.AsistenciaSalud;
+const activePhones = ["21-A"];
 let startIndex = 0;
-let numEnvios = 200;
-let envio = true;
+let numEnvios = 350;
+let envio = false;
 let heatingLines = false;
 let firstMessage = false;
 
@@ -46,12 +42,20 @@ const app = express();
 connect();
 
 //Uso de GraphQL
-app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: schema }));
-app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign_info.name + 'Clients') }));
+app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
+app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
+app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign.collection + 'Clients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
+const campaign_info = await fetchCampaign(campaign.collection);
+const product_info = campaign_info["searchCampaign"].products[product];
+const sessionIds = new Map();
+
 async function botInit() {
-  //createClient('C');
+  setArtInfo(product_info);
+  let skip = startIndex + (numEnvios * activePhones.length);
+  let users = await fetchClients(campaign.current_db, startIndex, skip);
+  let usersObj = users["searchClients"];
   let phones = await fetchPhones();
   for (const phone of phones.searchPhones) {
     if (activePhones.includes(phone.name)) {
@@ -74,16 +78,7 @@ async function botInit() {
         undefined
       )
         .then((client) => {
-          if (firstMessage) {
-            firstChat(client, phoneName);
-            firstMessage = false;
-          }
-          if (!heatingLines) {
-            start(client, idActiveLine, phoneName);
-          }
-          else {
-            startLinesHeating(client, idActiveLine);
-          }
+          start(client, idActiveLine, phoneName, usersObj);
         })
         .catch((error) => {
           console.log(error);
@@ -94,8 +89,14 @@ async function botInit() {
 
 botInit();
 
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+async function delay(ms) {
+  try {
+    return new Promise((resolve, reject) => {
+      setTimeout(resolve, ms);
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function randomProperty(obj) {
@@ -111,7 +112,7 @@ function getName(fullname) {
 function getActiveLine(lines) {
   for (const line of lines) {
     if (line.status === LineStatus.ACTIVE) {
-      idActiveLine = lineById.searchLine._id;
+      return line;
     }
   }
 }
@@ -125,8 +126,8 @@ async function lineHeating(client, idLine) {
     let start_t = new Date();
     let randomLines = randomProperty(obj);
     if (idLine !== randomLines._id) {
-      let name = randomLines._id;
-      let line = randomProperty(randomLines.lines);
+      let name = randomLines.name;
+      let line = getActiveLine(randomLines.lines);
       let number = line.number;
 
       let to_message = "";
@@ -139,12 +140,12 @@ async function lineHeating(client, idLine) {
         to_message = "593" + number + "@c.us";
       }
 
-      let time_delay = getRandomInt(15000, 20000);
+      let time_delay = getRandomInt(10000, 15000);
       let time_message = time_delay / getRandomInt(3, 5);
       let time_end = getRandomInt(30000, 35000);
 
       await delay(time_message);
-      await client.sendText(to_message, "Hi! " + name);
+      await client.sendText(to_message, "Hi! " + name + ((Math.random() > 0.4) ? '' : ' 👋'));
 
       let numMessage = getRandomInt(1, 2);
       for (
@@ -153,10 +154,7 @@ async function lineHeating(client, idLine) {
         messageRepetition++
       ) {
         await delay(time_message);
-        let randWords = randomWords({ min: 3, max: 10 });
-        let randomString = randWords.join(' ');
-        // Send basic text
-        await client.sendText(to_message, randomString);
+        await client.sendText(to_message, mensaje_random());
       }
 
       await delay(time_end);
@@ -170,7 +168,7 @@ async function lineHeating(client, idLine) {
 
 async function firstChat(client, phoneName) {
   let start_t = new Date();
-  let contact = "593" + 980535586 + "@c.us"; //980535586 andres  992900544 juan    987592024 Patricia     contact
+  let contact = "593" + "980535586" + "@c.us"; //980535586 andres  992900544 juan    987592024 Patricia     contact
   let name = "ANDRES";
   let contact_status = await client.checkNumberStatus(contact);
   if (contact_status.numberExists) {
@@ -180,14 +178,14 @@ async function firstChat(client, phoneName) {
     let time_end = getRandomInt(20000, 25000);
     if (envio == true) {
       //Genera pdf
-      await generar_pdf("0", campaign_info, phoneName, name);
+      await generar_pdf("0", phoneName, name);
       await delay(time_file);
       //Envía pdf
       await client
         .sendFile(
           contact,
-          `src/components/pdf/${campaign_info.name}${phoneName}.pdf`,
-          `${campaign_info.pdf_name}${getRandomInt(1, 100)}.pdf`,
+          `src/components/pdf/${product_info.product_name}${phoneName}.pdf`,
+          `${product_info.product_name}_${getRandomInt(1, 100)}.pdf`,
           "Abrir pdf"
         )
         .then((result) => {
@@ -197,40 +195,36 @@ async function firstChat(client, phoneName) {
           //console.error('Error when sending: ', error); //return object error
         });
       await delay(time_message);
-      await client.sendText(contact, `${saludo(start_t)} ${name}`); //name
+      await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje()); //name
       //Mensaje Completo
-      await client.sendText(contact, mensaje(campaign_info.name + '-' + campaign_info.pdf_name));
+      //await client.sendText(contact, mensaje());
       console.log("Primer envio terminado");
       await delay(time_end);
     } else {
       await delay(10000);
     }
   } else {
-    console.log("Primer envio no existe");
+    console.log("Error en primer envio");
   }
 }
 
-async function production(client, idActiveLine, phoneName) {
-  let colec = "C"; //TC: Coleccion 1, C: Coleccion 2.
-  let users = await fetchBGRClientsTC(colec);
-  let obj = users["searchClients" + colec]; 
-  let lengthLines = obj.length; 
+async function production(client, idActiveLine, phoneName, obj) {
+  let lengthLines = obj.length;
   console.log("Nombre Telefono: ", phoneName);
   let num_existe = 0;
   let num_noexiste = 0;
-  //let startIndex = 1085;
   let indexPhone = activePhones.indexOf(phoneName);
   let cont = 0;
   let startdate = new Date();
   for (
-    let index = indexPhone + startIndex;
+    let index = indexPhone;
     index <= lengthLines - 1;
     index = index + activePhones.length
   ) {
     if (cont >= numEnvios) {
       break;
     }
-    if (cont % 5 === 0 && cont !== 0) {
+    if (cont % 10 === 0 && cont !== 0) {
       await lineHeating(client, idActiveLine);
       console.log(`Telefono ${phoneName} Iniciando Ronda de Calentamineto`);
     }
@@ -244,13 +238,12 @@ async function production(client, idActiveLine, phoneName) {
       console.log(times_reached);*/
     if (contact != null /*&& times_reached != 1*/) {
       contact = "593" + contact + "@c.us";
-      //let contact = "593" + 995109767 + "@c.us"; //980535586 andres  992900544 juan    987592024 Patricia     contact
+      //let contact = "593" + 995109767 + "@c.us";
       let contact_status = await client.checkNumberStatus(contact);
-      console.log("contact>>>" + contact);
       if (contact_status.numberExists) {
         num_existe++;
         console.log(
-          `[${index}] [${phoneName}] ${obj[index].name} tef:${contact} id:${identificacion} (Total si existen: ${num_existe})`
+          `[${startIndex + index}] [${phoneName}] ${obj[index].name} tef:${contact} id:${identificacion} (Total si existen: ${num_existe})`
         );
         let time_delay = getRandomInt(27000, 35000);
         let time_file = time_delay / getRandomInt(4, 10);
@@ -258,14 +251,14 @@ async function production(client, idActiveLine, phoneName) {
         let time_end = getRandomInt(40000, 50000);
         if (envio == true) {
           //Genera pdf
-          await generar_pdf(identificacion, campaign_info, phoneName, name);
+          await generar_pdf(identificacion, phoneName, name);
           await delay(time_file);
           //Envía pdf
           await client
             .sendFile(
               contact,
-              `src/components/pdf/${campaign_info.name}${phoneName}.pdf`,
-              `${campaign_info.pdf_name}${getRandomInt(1, 100)}.pdf`,
+              `src/components/pdf/${product_info.product_name}${phoneName}.pdf`,
+              `${product_info.product_name}_${getRandomInt(1, 100)}.pdf`,
               "Abrir pdf"
             )
             .then((result) => {
@@ -275,19 +268,18 @@ async function production(client, idActiveLine, phoneName) {
               //console.error('Error when sending: ', error); //return object error
             });
           await delay(time_message);
-          await client.sendText(contact, `${saludo(start_t)} ${name}`); //name
+          await client.sendText(contact, `${saludo(start_t)} ${name}.` + mensaje());
           //Mensaje Completo
-          await client.sendText(contact, mensaje(campaign_info.name + '-' + campaign_info.pdf_name));
+          //await client.sendText(contact, mensaje(campaign_info.name + '-' + campaign_info.pdf_name));
           updateClient(
-            colec,
             obj[index]._id,
-            campaign_info.db_name,
+            product_info.product_name,
             new Date(),
-            phoneName
+            phoneName,
+            product
           );
           console.log(
-            `Envío (${cont}) de ${phoneName} Terminado, esperando ${
-              time_end / 1000
+            `Envío (${cont}) de ${phoneName} Terminado, esperando ${time_end / 1000
             }s para el próximo envío`
           );
           await delay(time_end);
@@ -301,33 +293,25 @@ async function production(client, idActiveLine, phoneName) {
         );
       }
     }
-    //}
-    /*
-    console.log(
-      `Envío (${cont}) realizado en ${(new Date() - start_t) / 1000} segundos`
-    );
-    */
   }
   console.log(
-    `[${phoneName}] Tiempo de Ejecución: ${
-      (new Date() - startdate) / 60000
+    `[${phoneName}] Tiempo de Ejecución: ${(new Date() - startdate) / 60000
     } minutos`
   );
   await delay(getRandomInt(600000, 900000));
-  startLinesHeating(client, idActiveLine);
 }
 
 async function startLinesHeating(client, idActiveLine) {
   let start_t = new Date();
   let end_hour = getRandomInt(22, 23);
   while (start_t.getHours() < end_hour) {
-    lineHeating(client, idActiveLine);
+    await lineHeating(client, idActiveLine);
     await delay(getRandomInt(300000, 1200000));
     start_t = new Date();
   }
 }
 
-async function start(client, idActiveLine, phoneName) {
+async function start(client, idActiveLine, phoneName, obj) {
   console.log("Starting");
   let startdate = new Date();
   let day = startdate.getDate();
@@ -337,29 +321,45 @@ async function start(client, idActiveLine, phoneName) {
   console.log(`${day}-${month}-${year}, ${hour}h`);
   client.onMessage(async (message) => {
     let name = message.sender.name;
-    if (phoneNames.indexOf(name) == -1 && message.type == "chat") {
-      let mensaje = message.body.toLowerCase();
-      let keywords = [
-        "información",
-        "informacion",
-        "consiste",
-        "se activa",
-        "activo",
-        "trata",
-      ];
-      let term_found = keywords.some(function (_term) {
-        return mensaje.indexOf(_term) > -1;
-      });
-      if (term_found) {
-        await delay(getRandomInt(1000, 2000));
-        client.sendText(message.from, respuesta[0]);
-        await delay(getRandomInt(1000, 2000));
-        client.sendText(message.from, respuesta[1]);
-        await delay(getRandomInt(1000, 2000));
-        client.sendText(message.from, respuesta[2]);
+    let searchInDB = await checkInDB(name);
+    let phoneInDB = searchInDB["searchDB"];
+    if (!phoneInDB && message.type == "chat") {
+      setSessionAndUser(message.from);
+      let session = sessionIds.get(message.from);
+      let payload = await sendToDialogFlow(message.body, session);
+      let response = payload.fulfillmentMessages[0].text.text[0];
+      switch (response) {
+        case 'GET_INFO':
+          for (let reply_message of product_info.info_messages) {
+            await delay(getRandomInt(1000, 2000));
+            client.sendText(message.from, reply_message);
+          }
+          break;
+        case 'GET_COST_INFO':
+          await delay(getRandomInt(1000, 2000));
+          client.sendText(message.from, product_info.cost_message);
+          break;
+        default:
+          break;
       }
     }
   });
-  await production(client, idActiveLine, phoneName);
-  //await lineHeating(client, idActiveLine);
+  if (firstMessage) {
+    await firstChat(client, phoneName);
+    firstMessage = false;
+  }
+  if (!heatingLines) {
+    await production(client, idActiveLine, phoneName, obj);
+  }
+  await startLinesHeating(client, idActiveLine);
+}
+
+async function setSessionAndUser(senderId) {
+  try {
+    if (!sessionIds.has(senderId)) {
+      sessionIds.set(senderId, v4());
+    }
+  } catch (error) {
+    throw error;
+  }
 }

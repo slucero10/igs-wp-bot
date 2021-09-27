@@ -1,10 +1,11 @@
-import { makeExecutableSchema } from 'graphql-tools';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 import { resolvers } from './resolvers.js';
 
 const typeDefs = `
   type Query {
     searchPhone(_id: ID!): Phone
     searchPhones: [Phone]
+    searchDB(name: String): Boolean
   }
 
   type Phone {

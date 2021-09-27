@@ -8,6 +8,14 @@ export const resolvers = {
     searchPhones: async () => {
       return Phone.find();
     },
+    searchDB: async (root, { name }) => {
+      let phone = await Phone.findOne({ name: name });
+      if (phone == null || phone == undefined) {
+        return false;
+      } else {
+        return true;
+      }
+    },
   },
   Mutation: {
     createPhone: async (_, { input }) => {

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 export async function connect() {
   mongoose.set('useFindAndModify', false);
   await mongoose
-    .connect('mongodb://IGSVentaDigital:Poma8277@192.168.23.11:27017/IGS', {
+    .connect(process.env.MONGODB_URI, {
       authSource: 'admin',
       useNewUrlParser: true,
       useUnifiedTopology: true,

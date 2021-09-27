@@ -18,7 +18,7 @@ export function fetchPhones() {
   return client.request(query);
 }
 
-export function fetchphone(_id) {
+export function fetchPhone(_id) {
   const query = gql`
     {
       searchPhone(_id: "${_id}") {
@@ -32,25 +32,12 @@ export function fetchphone(_id) {
   `;
   return client.request(query);
 }
-/*
-export function fetchArt(name) {
+
+export function checkInDB(name) {
   const query = gql`
-    {
-      searchArt(name: "${name}" ){
-        _id
-        name
-        phoneNames
-        campaign{
-          name
-          url_accept_assistance
-          html_path
-          height
-          width
-          promo
-        }
-    }
+  {
+    searchDB(name: "${name}")
   }
   `;
   return client.request(query);
 }
-*/

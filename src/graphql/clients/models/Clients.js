@@ -99,6 +99,9 @@ const clientSchema = new Schema(
     identification: {
       type: String,
     },
+    base: {
+      type: String,
+    },
     phone: {
       type: String,
     },
@@ -146,10 +149,6 @@ export function Clients(collection) {
   return model(collection, clientSchema, collection);
 }
 
-/*export const BGRClientsTC = model('BGRClientsTC', clientSchema);
-export const BGRClientsC = model('BGRClientsC', clientSchema);
-export const BGRClientsTCStatus = model('BGRClientsTCStatus', clientStatusSchema);
-export const BGRClientsCStatus = model('BGRClientsCStatus', clientStatusSchema);*/
 export const IGSStatus = model('IGSStatus', statusSchema);
 export const WPStatus = model('WPStatus', wpStatusSchema);
 
