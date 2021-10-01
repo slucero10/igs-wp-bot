@@ -28,12 +28,12 @@ import { v4 } from "uuid";
 dontenv.config();
 
 //Inicializar variables del Bot
-const campaign = Campaigns.BGR;
-const product = campaign.products.Mascotas;
-const activePhones = [];
-let startIndex = 0;
+const campaign = Campaigns.FARMAENLACEMED;
+const product = campaign.products.SaludIntegral; 
+const activePhones = ["18-AB", "19-AB", "20-AB"];
+let startIndex = 0; 
 let numEnvios = 350;
-let envio = true;
+let envio = false;
 let heatingLines = true;
 let firstMessage = false;
 
