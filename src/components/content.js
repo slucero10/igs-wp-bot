@@ -88,7 +88,7 @@ export function mensaje() {
   while (mensaje.includes('\\p')) {
     mensaje = mensaje.replace('\\p', puntuacion[getRandomInt(0, 1)])
   }
-  return mensaje;
+  return mensaje + espacios[getRandomInt(0, 1)] + mensaje_activacion;
 }
 
 export function mensaje_random() {

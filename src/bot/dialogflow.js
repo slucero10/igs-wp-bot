@@ -1,5 +1,5 @@
 import dialogflow from '@google-cloud/dialogflow';
-import {} from 'dotenv/config'
+import {} from 'dotenv/config';
 
 const credentials = {
     client_email: process.env.GOOGLE_CLIENT_EMAIL,

@@ -28,14 +28,14 @@ import { v4 } from "uuid";
 dontenv.config();
 
 //Inicializar variables del Bot
-const campaign = Campaigns.FARMAENLACEFE;
-const product = campaign.products.AsistenciaSalud;
-const activePhones = ["21-A"];
-let startIndex = 0;
+const campaign = Campaigns.BGR;
+const product = campaign.products.Mascotas;
+const activePhones = ["5-A"];
+let startIndex = 1050;
 let numEnvios = 350;
-let envio = false;
-let heatingLines = false;
-let firstMessage = false;
+let envio = true;
+let heatingLines = true;
+let firstMessage = true;
 
 //Inicializar Express
 const app = express();
@@ -323,7 +323,7 @@ async function start(client, idActiveLine, phoneName, obj) {
     let name = message.sender.name;
     let searchInDB = await checkInDB(name);
     let phoneInDB = searchInDB["searchDB"];
-    if (!phoneInDB && message.type == "chat") {
+    if (!phoneInDB && message.type == "chat" && message.length < 255) {
       setSessionAndUser(message.from);
       let session = sessionIds.get(message.from);
       let payload = await sendToDialogFlow(message.body, session);
