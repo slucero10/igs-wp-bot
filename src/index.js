@@ -228,7 +228,6 @@ async function production(client, idActiveLine, phoneName, obj) {
       await lineHeating(client, idActiveLine);
       console.log(`Telefono ${phoneName} Iniciando Ronda de Calentamineto`);
     }
-    cont++;
     let start_t = new Date();
     let identificacion = obj[index].identification;
     let name = getName(obj[index].name);
@@ -278,6 +277,7 @@ async function production(client, idActiveLine, phoneName, obj) {
             phoneName,
             product
           );
+          cont++;
           console.log(
             `Envío (${cont}) de ${phoneName} Terminado, esperando ${time_end / 1000
             }s para el próximo envío`
