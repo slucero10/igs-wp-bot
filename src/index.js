@@ -1,5 +1,3 @@
-//Prueba 2 
-
 import { create } from "venom-bot";
 import express, { response } from "express";
 import { graphqlHTTP } from "express-graphql";
