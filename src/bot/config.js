@@ -27,19 +27,20 @@ export const Campaigns = Object.freeze({
       Mascotas: 0,
       CelularProtegido: 1,
     },
-    current_db: 'BGR10/09/21',
+    current_db: '',
   },
   FARMAENLACEMED: {
     collection: 'FEMedicity',
     products: {
       SaludIntegral: 0,
     },
+    current_db: '',
   },
   FARMAENLACEFE: {
     collection: 'FEFarmaciasEconomicas',
     products: {
       AsistenciaSalud: 0,
     },
-    current_db: 'FE030821',
+    current_db: '',
   },
 });

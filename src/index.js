@@ -30,12 +30,12 @@ dontenv.config();
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.Mascotas;
-const activePhones = ["5-A"];
-let startIndex = 1050;
+const activePhones = [];
+let startIndex = 0;
 let numEnvios = 350;
 let envio = true;
 let heatingLines = true;
-let firstMessage = true;
+let firstMessage = false;
 
 //Inicializar Express
 const app = express();
