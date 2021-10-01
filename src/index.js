@@ -1,3 +1,5 @@
+//Prueba 2 
+
 import { create } from "venom-bot";
 import express, { response } from "express";
 import { graphqlHTTP } from "express-graphql";
@@ -40,7 +42,6 @@ let firstMessage = false;
 //Inicializar Express
 const app = express();
 connect();
-//Prueba
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
