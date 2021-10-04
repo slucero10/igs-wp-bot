@@ -40,7 +40,7 @@ let firstMessage = false;
 //Inicializar Express
 const app = express();
 connect();
-//Prueba
+
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
@@ -120,9 +120,14 @@ function getActiveLine(lines) {
 async function lineHeating(client, idLine) {
   let lines = await fetchPhones();
   let obj = lines["searchPhones"];
-  let lengthLines = Math.trunc(obj.length / 3);
+  let lengthLines = 0;
+  if (obj.length >= 11) {
+    lengthLines = getRandomInt(9, 11);
+  } else {
+    lengthLines = Math.trunc(obj.length / 2);
+  }
   console.log("Calentando Línea");
-  for (let index = 1; index <= lengthLines; index++) {
+  for (let index = 0; index <= lengthLines; index++) {
     let start_t = new Date();
     let randomLines = randomProperty(obj);
     if (idLine !== randomLines._id) {

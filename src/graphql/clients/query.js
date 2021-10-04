@@ -12,6 +12,7 @@ export function fetchClients(current_db, first, skip) {
           name
           identification
           phone
+          
         }
       }
     `;

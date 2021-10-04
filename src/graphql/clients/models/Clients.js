@@ -114,37 +114,6 @@ const clientSchema = new Schema(
   }
 );
 
-const clientStatusSchema = new Schema(
-  {
-    client: {
-      type: String,
-      ref: 'Client',
-      required: true,
-    },
-    wp_status: {
-      type: String,
-      enum: Object.values(statusTypes),
-      default: statusTypes.ACTIVE, //Registro de si el numero tiene Whatsapp o No
-    },
-    sended: {
-      //Contador de mensajes enviados
-      type: Number,
-    },
-    date_sended: {
-      //Registro de Fecha de Envío
-      type: String,
-    },
-    date_activated: {
-      //Registro de Fecha de Activacion
-      type: String,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
-
-
 export function Clients(collection) {
   return model(collection, clientSchema, collection);
 }
