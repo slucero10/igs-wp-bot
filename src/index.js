@@ -40,7 +40,10 @@ let firstMessage = false;
 //Inicializar Express
 const app = express();
 connect();
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3e8d2355085ea94242dc25cfe366b672c38b1d57
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
