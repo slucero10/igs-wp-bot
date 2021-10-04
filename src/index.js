@@ -121,8 +121,8 @@ async function lineHeating(client, idLine) {
   let lines = await fetchPhones();
   let obj = lines["searchPhones"];
   let lengthLines = 0;
-  if (obj.length >= 11) {
-    lengthLines = getRandomInt(9, 11);
+  if (obj.length >= 9) {
+    lengthLines = getRandomInt(7, 9);
   } else {
     lengthLines = Math.trunc(obj.length / 2);
   }

@@ -55,7 +55,6 @@ export async function sendToDialogFlow(msg, session, params) {
         }
         result.fulfillmentMessages = defaultResponses;
         return result;
-        // console.log("se enviara el resultado: ", result);
     } catch (e) {
         console.log(e);
     }
