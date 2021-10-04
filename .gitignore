@@ -2,3 +2,4 @@ node_modules
 tokens
 /.idea
 .env
+src/components/pdf/*
