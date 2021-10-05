@@ -331,7 +331,7 @@ async function start(client, idActiveLine, phoneName, obj) {
     let name = message.sender.name;
     let searchInDB = await checkInDB(name);
     let phoneInDB = searchInDB["searchDB"];
-    if (!phoneInDB && message.type == "chat" && message.body.length < 255 && !heatingLines) {
+    if (!phoneInDB && message.type == "chat" && message.body.length < 255) {
       setSessionAndUser(message.from);
       let session = sessionIds.get(message.from);
       let payload = await sendToDialogFlow(message.body, session);
