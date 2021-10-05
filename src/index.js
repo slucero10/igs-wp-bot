@@ -143,6 +143,9 @@ async function lineHeating(client, idLine) {
         to_message = group.id.user + "@g.us";
       } else {
         to_message = "593" + number + "@c.us";
+        let contact_status = await client.checkNumberStatus(to_message);
+        if (!contact_status)
+          continue;
       }
 
       let time_delay = getRandomInt(10000, 15000);
