@@ -3,3 +3,4 @@ tokens
 /.idea
 .env
 /src/components/pdf/*
+!/src/components/pdf/.gitkeep
