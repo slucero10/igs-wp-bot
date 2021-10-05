@@ -144,7 +144,7 @@ async function lineHeating(client, idLine) {
       } else {
         to_message = "593" + number + "@c.us";
         let contact_status = await client.checkNumberStatus(to_message);
-        if (!contact_status)
+        if (!contact_status.numberExists)
           continue;
       }
 
