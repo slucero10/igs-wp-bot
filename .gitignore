@@ -2,5 +2,4 @@ node_modules
 tokens
 /.idea
 .env
-src/components/pdf/*
-!src/components/pdf/.gitkeep
+/src/components/pdf/*
