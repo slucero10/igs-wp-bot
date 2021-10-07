@@ -34,7 +34,7 @@ const activePhones = [];
 let startIndex = 0;
 let numEnvios = 350;
 let envio = true;
-let heatingLines = true;
+let heatingLines = false;
 let firstMessage = false;
 
 //Inicializar Express
@@ -176,7 +176,7 @@ async function lineHeating(client, idLine) {
 
 async function firstChat(client, phoneName) {
   let start_t = new Date();
-  let contact = "593" + "980535586" + "@c.us"; //980535586 andres  992900544 juan    987592024 Patricia     contact
+  let contact = "593" + "980535586" + "@c.us"; //980535586 andres  992900544 juan
   let name = "ANDRES";
   let contact_status = await client.checkNumberStatus(contact);
   if (contact_status.numberExists) {
