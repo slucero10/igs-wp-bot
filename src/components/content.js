@@ -57,7 +57,7 @@ export async function generar_pdf(user, id, name) {
       //console.log(res);
     })
     .catch((error) => {
-      //console.error(error);
+      console.error(error);
     });
 }
 

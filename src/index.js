@@ -30,11 +30,11 @@ dontenv.config();
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.Mascotas;
-const activePhones = [];
+const activePhones = ["1-A"];
 let startIndex = 0;
 let numEnvios = 350;
 let envio = true;
-let heatingLines = false;
+let heatingLines = true;
 let firstMessage = false;
 
 //Inicializar Express
@@ -117,18 +117,18 @@ function getActiveLine(lines) {
   }
 }
 
-async function lineHeating(client, idLine) {
+async function lineHeating(client, idLine, lineName) {
+  console.log(`Telefono ${lineName} Iniciando Ronda de Calentamineto`);
+  let heatedLines = [];
   let lines = await fetchPhones();
   let obj = lines["searchPhones"];
   let lengthLines = 0;
-  if (obj.length >= 9) {
-    lengthLines = getRandomInt(7, 9);
+  if (obj.length >= 8) {
+    lengthLines = getRandomInt(5, 8);
   } else {
     lengthLines = Math.trunc(obj.length / 2);
   }
-  console.log("Calentando Línea");
   for (let index = 0; index <= lengthLines; index++) {
-    let start_t = new Date();
     let randomLines = randomProperty(obj);
     if (idLine !== randomLines._id) {
       let name = randomLines.name;
@@ -140,8 +140,10 @@ async function lineHeating(client, idLine) {
       const groups = await client.getAllChatsGroups();
       if (Math.random() > 0.5 && groups.length > 0) {
         let group = randomProperty(groups);
+        heatedLines.push(group.name);
         to_message = group.id.user + "@g.us";
       } else {
+        heatedLines.push(name);
         to_message = "593" + number + "@c.us";
         let contact_status = await client.checkNumberStatus(to_message);
         if (!contact_status.numberExists)
@@ -166,12 +168,9 @@ async function lineHeating(client, idLine) {
       }
 
       await delay(time_end);
-
-      let end_t = new Date();
-      let timestamp = end_t - start_t;
-      console.log("Timestamp: " + timestamp / 60000);
     }
   }
+  console.log(`Telefono ${lineName} Completó Ronda de Calentamiento - Chats: ${heatedLines}`);
 }
 
 async function firstChat(client, phoneName) {
@@ -206,13 +205,13 @@ async function firstChat(client, phoneName) {
       await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje()); //name
       //Mensaje Completo
       //await client.sendText(contact, mensaje());
-      console.log("Primer envio terminado");
+      console.log("Primer envío completado");
       await delay(time_end);
     } else {
       await delay(10000);
     }
   } else {
-    console.log("Error en primer envio");
+    console.log("Error en el primer envio");
   }
 }
 
@@ -233,8 +232,8 @@ async function production(client, idActiveLine, phoneName, obj) {
       break;
     }
     if (cont % 10 === 0 && cont !== 0) {
-      await lineHeating(client, idActiveLine);
-      console.log(`Telefono ${phoneName} Iniciando Ronda de Calentamineto`);
+      await lineHeating(client, idActiveLine, phoneName);
+      //console.log(`Telefono ${phoneName} Iniciando Ronda de Calentamineto`);
     }
     let start_t = new Date();
     let identificacion = obj[index].identification;
@@ -250,7 +249,7 @@ async function production(client, idActiveLine, phoneName, obj) {
       if (contact_status.numberExists) {
         num_existe++;
         console.log(
-          `[${startIndex + index}] [${phoneName}] ${obj[index].name} tef:${contact} id:${identificacion} (Total si existen: ${num_existe})`
+          `[${startIndex + index}] [${phoneName}] ${obj[index].name} telf:${contact} id:${identificacion} (Total si existen: ${num_existe})`
         );
         let time_delay = getRandomInt(27000, 35000);
         let time_file = time_delay / getRandomInt(4, 10);
@@ -287,8 +286,7 @@ async function production(client, idActiveLine, phoneName, obj) {
           );
           cont++;
           console.log(
-            `Envío (${cont}) de ${phoneName} Terminado, esperando ${time_end / 1000
-            }s para el próximo envío`
+            `Envío (${cont}) de ${phoneName} Terminado, esperando ${time_end / 1000}s para el próximo envío`
           );
           await delay(time_end);
         } else {
@@ -297,24 +295,27 @@ async function production(client, idActiveLine, phoneName, obj) {
       } else {
         num_noexiste++;
         console.log(
-          `NO Index[${index}] ${obj[index].name} tef:${contact} (Total no existen: ${num_noexiste})`
+          `NO Index [${index}] ${obj[index].name} telf:${contact} (Total no existen: ${num_noexiste})`
         );
       }
     }
   }
   console.log(
-    `[${phoneName}] Tiempo de Ejecución: ${(new Date() - startdate) / 60000
+    `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: ${(new Date() - startdate) / 60000
     } minutos`
   );
   await delay(getRandomInt(600000, 900000));
 }
 
-async function startLinesHeating(client, idActiveLine) {
+async function startLinesHeating(client, idActiveLine, phoneName) {
   let start_t = new Date();
   let end_hour = getRandomInt(22, 23);
+  let wait_time = 0;
   while (start_t.getHours() < end_hour) {
-    await lineHeating(client, idActiveLine);
-    await delay(getRandomInt(300000, 1200000));
+    await lineHeating(client, idActiveLine, phoneName);
+    wait_time = getRandomInt(300000, 1200000);
+    console.log(`Teléfono ${phoneName} esperando ${(wait_time / 1000) / 60} min para la próxima ronda de calentamiento`)
+    await delay(wait_time);
     start_t = new Date();
   }
 }
@@ -334,7 +335,7 @@ async function start(client, idActiveLine, phoneName, obj) {
     if (!phoneInDB && message.type == "chat" && message.body.length < 255) {
       setSessionAndUser(message.from);
       let session = sessionIds.get(message.from);
-      let payload = await sendToDialogFlow(message.body, session);
+      let payload = await sendToDialogFlow(message.body, session, phoneName);
       let response = payload.fulfillmentMessages[0].text.text[0];
       switch (response) {
         case 'GET_INFO':
@@ -359,7 +360,7 @@ async function start(client, idActiveLine, phoneName, obj) {
   if (!heatingLines) {
     await production(client, idActiveLine, phoneName, obj);
   }
-  await startLinesHeating(client, idActiveLine);
+  await startLinesHeating(client, idActiveLine, phoneName);
 }
 
 async function setSessionAndUser(senderId) {

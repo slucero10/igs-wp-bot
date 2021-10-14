@@ -15,7 +15,7 @@ const sessionClient = new dialogflow.SessionsClient({
  * Send a query to the dialogflow agent, and return the query result.
  * @param {string} projectId The project to be used
  */
-export async function sendToDialogFlow(msg, session, params) {
+export async function sendToDialogFlow(msg, session, params, lineName) {
     let textToDialogFlow = msg;
     try {
         const sessionPath = sessionClient.projectAgentSessionPath(
@@ -39,7 +39,7 @@ export async function sendToDialogFlow(msg, session, params) {
         };
         const responses = await sessionClient.detectIntent(request);
         const result = responses[0].queryResult;
-        console.log("[MENSAJE RECIBIDO] INTENT EMPAREJADO: ", result.intent.displayName);
+        console.log(`MENSAJE RECIBIDO [${lineName}] Intent Emparejado: `, result.intent.displayName);
         let defaultResponses = [];
         if (result.action !== "input.unknown") {
             result.fulfillmentMessages.forEach((element) => {
