@@ -30,17 +30,18 @@ import {
 import dontenv from 'dotenv';
 //import { sendToDialogFlow } from "./bot/dialogflow.js";
 import { v4 } from "uuid";
+import { Campaign } from "./graphql/campaigns_info/models/Campaigns.js";
 
 dontenv.config();
 
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.Mascotas;
-const activePhones = [];
+const activePhones = ["1-A"];
 let startIndex = 0;
 let numEnvios = 350;
 let envio = true;
-let heatingLines = false;
+let heatingLines = true;
 let firstMessage = true;
 
 //Inicializar Express
@@ -50,7 +51,7 @@ connect();
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
-app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(/*campaign.collection + */'PruebaClients') }));
+app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign.collection + 'Clients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
 const campaign_info = await fetchCampaign(campaign.collection);
@@ -410,7 +411,8 @@ async function start(client, idActiveLine, phoneName, obj) {
             break;
         }
       } else {
-        client.sendText(message.from, Responses.welcome + Responses.menu)
+        client.sendText(message.from, 
+          Responses.welcome.replace('&A', product_info.assistance_name).replace('&C', campaign.name) + Responses.menu)
         console.log(message_received + "FIRST_TIME_MENU");
       }
       /*switch (response) {

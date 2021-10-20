@@ -14,32 +14,30 @@ let coma = [',', '']
 let emojis = ['😀', '😱', '🥺', '😐', '👍🏻', '😠', '❤️', '🍻'];
 
 let mensaje_activacion =
-  'Para activar su servicio acceda al' +
+  'Para activar su servicio, acceda al' +
   espacios[getRandomInt(0, 1)] +
   'PDF adjunto y de click en' +
   espacios[getRandomInt(0, 1)] +
   '"Activar Asistencia".' +
   espacios[getRandomInt(0, 1)] +
-  'Para más información' +
-  espacios[getRandomInt(0, 1)] +
-  'por favor responda a este mensaje' +
+  'Contáctenos para más información.' +
   puntuacion[getRandomInt(0, 1)];
 
 let art_info = new Object();
 
 export const Responses = Object.freeze({
-  welcome: 'Muchas gracias por comunicarse con nosotros. Por favor, elija una de las siguientes opciones:',
-  choose_option: 'No le he entendido, por favor elija una de las opciones del menú:',
+  welcome: 'Muchas gracias por comunicarse con nosotros y su interés en nuestra &A exclusivo para clientes &C. Por favor, elija una de las siguientes opciones:',
+  choose_option: 'Opción no válida, por favor elija una de las opciones del menú:',
   menu: '\n1. Más información\n2. Costo de la asistencia\n3. Activar la asistencia\n4. Dejar de recibir información acerca de este servicio'
     +'\n5. Dejar de recibir información de esta o cualquier otra asistencia\n6. Quiero que me contacten',
-  activate:'Para activar el servicio, por favor abra el PDF adjunto y de clic en el botón de "Activar Asistencia". '
+  activate:'Para activar el servicio, acceda al PDF adjunto y haga clic en el botón de "Activar Asistencia". '
     +'Una vez que sea redireccionado a nuestro sitio web, su asistencia ya se encontrará activada. '
-    +'Recuerde que al hacer clic en el botón, acepta los Términos y Condiciones del servicio',
-  unsubscribe_service: 'A partir de ahora ya no recibirá más información acerca de este producto',
+    +'Recuerde que al hacer clic en el botón, usted está aceptando las Condiciones del servicio que se encuentran detalladas en el PDF adjunto',
+  unsubscribe_service: 'Muchas gracias. A partir de ahora ya no recibirá más información acerca de este servicio',
   unsubscribed_service: 'Usted ya ha cancelado la suscripción a este servicio',
-  unsubscribe_number: 'Disculpe las molestias, a partir de ahora ya no recibirá más mensajes a este número',
+  unsubscribe_number: 'Disculpe las molestias, a partir de ahora ya no recibirá más información de nuestras asistencias',
   unsubscribed_number: 'Este número ya se encuentra fuera de nuestra base de datos',
-  contact: 'Nuestros operadores se comunicarán con usted el día de hoy o mañana. Muchas gracias por contactarnos',
+  contact: 'Muchas gracias por contactarnos. Uno de nuestros operadores se comunicará con usted lo más pronto posible.',
   /*company_info_message = 'El servicio de asistencia que le estamos ofreciendo es operado por *IGS Ecuador*, con el respaldo de *$*',
   unsuscribe_message = 'Para dejar de recibir información acerca de nuestras asistencias, por favor eliga una de las siguientes opciones:'
   + '\n1. No recibir más mensajes de esta asistencia\n2. No recibir más mensajes de esta o ninguna asistencia',

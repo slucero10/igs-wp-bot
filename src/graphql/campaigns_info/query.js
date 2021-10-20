@@ -9,6 +9,7 @@ export function fetchCampaign(name) {
         name
         products {
             product_name
+            assistance_name
             url_accept_assistance
             html_path
             height

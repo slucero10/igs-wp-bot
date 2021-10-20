@@ -1,6 +1,7 @@
 export const Campaigns = Object.freeze({
   ANDALUCIA: {
     collection: 'Andalucia',
+    name: 'Cooperativa de Ahorro y Crédito Andalucía',
     products: {
       AsistenciaSalud: 0,
     },
@@ -8,6 +9,7 @@ export const Campaigns = Object.freeze({
   },
   MULTICOOP: {
     collection: 'Multicoop',
+    name: 'Cooperativa de Ahorro y Crédito MULTICOOP',
     products: {
       Multiayuda: 0,
       Multisalud: 1,
@@ -16,6 +18,7 @@ export const Campaigns = Object.freeze({
   },
   SANTAROSA: {
     collection: 'SantaRosa',
+    name: 'Cooperativa de Ahorro y Crédito Santa Rosa',
     products: {
       AsistenciaSalud360: 0,
     },
@@ -23,6 +26,7 @@ export const Campaigns = Object.freeze({
   },
   BGR: {
     collection: 'BGR',
+    name: 'Banco General Rumiñahui',
     products: {
       Mascotas: 0,
       CelularProtegido: 1,
@@ -31,6 +35,7 @@ export const Campaigns = Object.freeze({
   },
   FARMAENLACEMED: {
     collection: 'FEMedicity',
+    name: 'Farmacias Medicity',
     products: {
       SaludIntegral: 0,
     },
@@ -38,6 +43,7 @@ export const Campaigns = Object.freeze({
   },
   FARMAENLACEFE: {
     collection: 'FEFarmaciasEconomicas',
+    name: 'Farmacias Económicas',
     products: {
       AsistenciaSalud: 0,
     },

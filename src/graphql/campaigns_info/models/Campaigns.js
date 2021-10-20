@@ -10,6 +10,7 @@ const campaignInfoSchema = new Schema(
         products: [
             {
                 product_name: String,
+                assistance_name: String,
                 url_accept_assistance: String,
                 html_path: String,
                 height: String,

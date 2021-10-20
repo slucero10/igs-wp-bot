@@ -14,6 +14,7 @@ type Campaign {
 
 type CampaignInfo {
     product_name: String
+    assistance_name: String
     url_accept_assistance: String
     html_path: String
     height: String
@@ -35,7 +36,6 @@ type Mutation {
 
 
 export default makeExecutableSchema({
-    typeDefs: typeDefs,
-    resolvers: resolvers,
-  });
-  
+  typeDefs: typeDefs,
+  resolvers: resolvers,
+});
