@@ -15,7 +15,7 @@ const sessionClient = new dialogflow.SessionsClient({
  * Send a query to the dialogflow agent, and return the query result.
  * @param {string} projectId The project to be used
  */
-export async function sendToDialogFlow(msg, session, params, lineName) {
+export async function sendToDialogFlow(msg, session, lineName, params) {
     let textToDialogFlow = msg;
     try {
         const sessionPath = sessionClient.projectAgentSessionPath(

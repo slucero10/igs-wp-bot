@@ -2,9 +2,11 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 const model = mongoose.model;
 
-const statusTypes = Object.freeze({
+const StatusTypes = Object.freeze({
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
+  UNSUBSCRIBED: 'UNSUBSCRIBED',
+  TO_CONTACT: 'TO_CONTACT'
 });
 
 const mediumTypes = Object.freeze({
@@ -55,8 +57,7 @@ const campaignStatusSchema = new Schema(
     },
     assistance_status: {
       type: String,
-      enum: Object.values(statusTypes),
-      default: statusTypes.INACTIVE, 
+      enum: Object.values(StatusTypes), 
     },
     activation_date: {
       type: String
@@ -87,7 +88,11 @@ const statusSchema = new Schema(
       {
         type: campaignStatusSchema
       }
-    ]
+    ],
+    contact_status: {
+      type: String,
+      enum: Object.values(StatusTypes)
+    }
   },{_id: false}
 );
 
@@ -120,5 +125,6 @@ export function Clients(collection) {
 
 export const IGSStatus = model('IGSStatus', statusSchema);
 export const WPStatus = model('WPStatus', wpStatusSchema);
+export const CampaignStatus = model('CampaignStatus', campaignStatusSchema)
 
-export const WP_status = statusTypes;
+export const WP_status = StatusTypes;

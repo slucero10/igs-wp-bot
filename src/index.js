@@ -6,10 +6,15 @@ import { Campaigns } from "./bot/config.js";
 import {
   fetchClients,
   updateClient,
+  updateCampaignStatus,
+  checkCampaignStatus,
+  updateContactStatus,
+  checkContactStatus
 } from "./graphql/clients/query.js";
 import { fetchPhones, checkInDB } from "./graphql/phones/query.js";
 import { fetchCampaign } from "./graphql/campaigns_info/query.js";
 import { LineStatus } from "./graphql/phones/models/Phone.js";
+import { WP_status } from "./graphql/clients/models/Clients.js";
 import phoneSchema from "./graphql/phones/schema.js";
 import { serverSchema } from "./graphql/clients/schema.js";
 import campaignSchema from "./graphql/campaigns_info/schema.js";
@@ -19,10 +24,11 @@ import {
   mensaje,
   getRandomInt,
   setArtInfo,
-  mensaje_random
+  mensaje_random,
+  Responses
 } from "./components/content.js";
 import dontenv from 'dotenv';
-import { sendToDialogFlow } from "./bot/dialogflow.js";
+//import { sendToDialogFlow } from "./bot/dialogflow.js";
 import { v4 } from "uuid";
 
 dontenv.config();
@@ -30,12 +36,12 @@ dontenv.config();
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.Mascotas;
-const activePhones = ["1-A"];
+const activePhones = [];
 let startIndex = 0;
 let numEnvios = 350;
 let envio = true;
-let heatingLines = true;
-let firstMessage = false;
+let heatingLines = false;
+let firstMessage = true;
 
 //Inicializar Express
 const app = express();
@@ -44,7 +50,7 @@ connect();
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
-app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign.collection + 'Clients') }));
+app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(/*campaign.collection + */'PruebaClients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
 const campaign_info = await fetchCampaign(campaign.collection);
@@ -233,18 +239,23 @@ async function production(client, idActiveLine, phoneName, obj) {
     }
     if (cont % 10 === 0 && cont !== 0) {
       await lineHeating(client, idActiveLine, phoneName);
-      //console.log(`Telefono ${phoneName} Iniciando Ronda de Calentamineto`);
     }
     let start_t = new Date();
     let identificacion = obj[index].identification;
     let name = getName(obj[index].name);
     let contact = obj[index].phone;
-    /*if (obj[index].IGS_status) {
-      let times_reached = obj[index].IGS_status.wp_status[1].times_reached;
-      console.log(times_reached);*/
-    if (contact != null /*&& times_reached != 1*/) {
+    let campaign_status = null;
+    let contact_st = null;
+    if (obj[index].IGS_status != null) {
+      if (obj[index].IGS_status.campaign_status[product] != undefined) {
+        campaign_status = obj[index].IGS_status.campaign_status[product].assistance_status;
+      }
+      if (obj[index].IGS_status.contact_status != undefined) {
+        contact_st = obj[index].IGS_status.contact_status;
+      }
+    }
+    if (contact != null) {
       contact = "593" + contact + "@c.us";
-      //let contact = "593" + 995109767 + "@c.us";
       let contact_status = await client.checkNumberStatus(contact);
       if (contact_status.numberExists) {
         num_existe++;
@@ -255,7 +266,8 @@ async function production(client, idActiveLine, phoneName, obj) {
         let time_file = time_delay / getRandomInt(4, 10);
         let time_message = time_delay / getRandomInt(3, 8);
         let time_end = getRandomInt(40000, 50000);
-        if (envio == true) {
+        if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE && 
+          contact_st != WP_status.UNSUBSCRIBED) {
           //Genera pdf
           await generar_pdf(identificacion, phoneName, name);
           await delay(time_file);
@@ -274,8 +286,7 @@ async function production(client, idActiveLine, phoneName, obj) {
               //console.error('Error when sending: ', error); //return object error
             });
           await delay(time_message);
-          await client.sendText(contact, `${saludo(start_t)} ${name}.` + mensaje());
-          //Mensaje Completo
+          await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
           //await client.sendText(contact, mensaje(campaign_info.name + '-' + campaign_info.pdf_name));
           updateClient(
             obj[index]._id,
@@ -302,7 +313,7 @@ async function production(client, idActiveLine, phoneName, obj) {
   }
   console.log(
     `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: ${(new Date() - startdate) / 60000
-    } minutos`
+    } minutos (${cont} mensajes enviados)`
   );
   await delay(getRandomInt(600000, 900000));
 }
@@ -327,17 +338,82 @@ async function start(client, idActiveLine, phoneName, obj) {
   let month = startdate.getMonth();
   let year = startdate.getFullYear();
   let hour = startdate.getHours();
+  const message_received = `MENSAJE RECIBIDO [${phoneName}] Opcion emparejada: `;
   console.log(`${day}-${month}-${year}, ${hour}h`);
   client.onMessage(async (message) => {
     let name = message.sender.name;
     let searchInDB = await checkInDB(name);
     let phoneInDB = searchInDB["searchDB"];
     if (!phoneInDB && message.type == "chat" && message.body.length < 255) {
-      setSessionAndUser(message.from);
+      /*await setSessionAndUser(message.from);
       let session = sessionIds.get(message.from);
       let payload = await sendToDialogFlow(message.body, session, phoneName);
-      let response = payload.fulfillmentMessages[0].text.text[0];
-      switch (response) {
+      let response = payload.fulfillmentMessages[0].text.text[0];*/
+      let number = message.from.replace('593', '').replace('@c.us', '');
+      if (await setSessionAndUser(message.from)) {
+        switch (message.body) {
+          case '1':
+            for (let reply_message of product_info.info_messages) {
+              await delay(2000);
+              client.sendText(message.from, reply_message);
+            }
+            console.log(message_received + message.body);
+            break;
+          case '2':
+            await delay(2000);
+            client.sendText(message.from, product_info.cost_message);
+            console.log(message_received + message.body);
+            break;
+          case '3':
+            await delay(2000);
+            client.sendText(message.from, Responses.activate);
+            console.log(message_received + message.body);
+            break;
+          case '4':
+            await delay(2000);
+            let temp = await checkCampaignStatus(number, product);
+            let status = temp["searchCampaignStatus"];
+            if (status != null) {
+              if (status.assistance_status != WP_status.UNSUBSCRIBED) {
+                await updateCampaignStatus(number, product_info.product_name, WP_status.UNSUBSCRIBED, product);
+                client.sendText(message.from, Responses.unsubscribe_service);
+              } else {
+                client.sendText(message.from, Responses.unsubscribed_service);
+              }
+            } else {
+              await updateCampaignStatus(number, product_info.product_name, WP_status.UNSUBSCRIBED, product);
+              client.sendText(message.from, Responses.unsubscribe_service);
+            }
+            console.log(message_received + message.body);
+            break;
+          case '5':
+            await delay(2000);
+            let contact_temp = await checkContactStatus(number);
+            let contact_status = contact_temp["searchContactStatus"];
+            if (contact_status == WP_status.UNSUBSCRIBED) {
+              client.sendText(message.from, Responses.unsubscribed_number);
+            } else {
+              await updateContactStatus(number, WP_status.UNSUBSCRIBED);
+              client.sendText(message.from, Responses.unsubscribe_number);
+            }
+            console.log(message_received + message.body);
+            break;
+          case '6':
+            await delay(2000);
+            await updateContactStatus(number, WP_status.TO_CONTACT);
+            client.sendText(message.from, Responses.contact);
+            console.log(message_received + message.body);
+            break;
+          default:
+            client.sendText(message.from, Responses.choose_option + Responses.menu);
+            console.log(message_received + "MENU");
+            break;
+        }
+      } else {
+        client.sendText(message.from, Responses.welcome + Responses.menu)
+        console.log(message_received + "FIRST_TIME_MENU");
+      }
+      /*switch (response) {
         case 'GET_INFO':
           for (let reply_message of product_info.info_messages) {
             await delay(getRandomInt(1000, 2000));
@@ -348,9 +424,12 @@ async function start(client, idActiveLine, phoneName, obj) {
           await delay(getRandomInt(1000, 2000));
           client.sendText(message.from, product_info.cost_message);
           break;
+        case 'WRONG_NUMBER':
+          
+          break;
         default:
           break;
-      }
+      }*/
     }
   });
   if (firstMessage) {
@@ -367,8 +446,10 @@ async function setSessionAndUser(senderId) {
   try {
     if (!sessionIds.has(senderId)) {
       sessionIds.set(senderId, v4());
+      return false;
     }
   } catch (error) {
     throw error;
   }
+  return true;
 }

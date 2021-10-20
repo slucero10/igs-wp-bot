@@ -1,4 +1,4 @@
-import { Clients, WPStatus, IGSStatus } from './models/Clients.js';
+import { Clients, WPStatus, IGSStatus, CampaignStatus } from './models/Clients.js';
 
 export function resolvers(collection) {
   const Client = Clients(collection);
@@ -13,6 +13,28 @@ export function resolvers(collection) {
         }
         return cursor;
       },
+      searchCampaignStatus: async(_, { number, index }) => {
+        let cursor = new Object();
+        cursor = await Client.findOne({ phone: number });
+        if (!cursor) {
+          cursor = await Client.findOne({ phone: '0' + number });
+        }
+        if (!cursor) {
+          return null;
+        }
+        return cursor.IGS_status.campaign_status[index];
+      },
+      searchContactStatus: async(_, { number }) => {
+        let cursor = new Object();
+        cursor = await Client.findOne({ phone: number });
+        if (!cursor) {
+          cursor = await Client.findOne({ phone: '0' + number });
+        }
+        if (!cursor) {
+          return null;
+        }
+        return cursor.IGS_status.contact_status;
+      }
     },
     Mutation: {
       updateWPStatus: async (_, { _id, index, input }) => {
@@ -22,7 +44,7 @@ export function resolvers(collection) {
           cont.IGS_status = new IGSStatus();
           cont.IGS_status.wp_status[index] = wpstatus;
         } else {
-          if (!cont.IGS_status[index]) {
+          if (!cont.IGS_status.wp_status[index]) {
             cont.IGS_status.wp_status[index] = new WPStatus(input);
           } else {
             cont.IGS_status.wp_status[index].times_reached += 1;
@@ -35,6 +57,46 @@ export function resolvers(collection) {
         const obj = JSON.parse(JSON.stringify(cont));
         return Client.findByIdAndUpdate(_id, obj);
       },
+      updateCampaignStatus: async (_, {phone, index, input}) => {
+        let cont = await Client.findOne({ phone: phone });
+        if (!cont) {
+          cont = await Client.findOne({ phone: '0' + phone });
+        }
+        if (!cont) {
+          return null;
+        }
+        if (!cont.IGS_status) {
+          const campaignStatus = new CampaignStatus(input);
+          cont.IGS_status = new IGSStatus();
+          cont.IGS_status.campaign_status[index] = campaignStatus;
+        } else {
+          if (!cont.IGS_status.campaign_status[index]) {
+            cont.IGS_status.campaign_status[index] = new CampaignStatus(input);
+          } else {
+            cont.IGS_status.campaign_status[index].name = input.name;
+            cont.IGS_status.campaign_status[index].assistance_status = input.assistance_status;
+          }
+        }
+        const obj = JSON.parse(JSON.stringify(cont));
+        return Client.findByIdAndUpdate(cont._id, obj);
+      },
+      updateContactStatus: async (_, {phone, input}) => {
+        let cont = await Client.findOne({ phone: phone });
+        if (!cont) {
+          cont = await Client.findOne({ phone: '0' + phone });
+        }
+        if (!cont) {
+          return null;
+        }
+        if (!cont.IGS_status) {
+          cont.IGS_status = new IGSStatus();
+          cont.IGS_status.contact_status = input.contact_status;
+        } else {
+          cont.IGS_status.contact_status = input.contact_status;
+        }
+        const obj = JSON.parse(JSON.stringify(cont));
+        return Client.findByIdAndUpdate(cont._id, obj);
+      }
     },
   }
 }
