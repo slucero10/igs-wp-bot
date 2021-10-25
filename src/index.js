@@ -270,7 +270,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE && 
           contact_st != WP_status.UNSUBSCRIBED) {
           //Genera pdf
-          await generar_pdf(identificacion, phoneName, name);
+          await generar_pdf(identificacion, phoneName, name, phoneName);
           await delay(time_file);
           //Envía pdf
           await client
@@ -401,11 +401,13 @@ async function start(client, idActiveLine, phoneName, obj) {
             break;
           case '6':
             await delay(2000);
-            await updateContactStatus(number, WP_status.TO_CONTACT);
+            await updateCampaignStatus(number, product_info.product_name, WP_status.TO_CONTACT, product);
             client.sendText(message.from, Responses.contact);
             console.log(message_received + message.body);
             break;
           default:
+            let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
+            //let response = payload.fulfillmentMessages[0].text.text[0];
             client.sendText(message.from, Responses.choose_option + Responses.menu);
             console.log(message_received + "MENU");
             break;

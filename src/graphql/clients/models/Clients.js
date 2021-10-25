@@ -6,7 +6,8 @@ const StatusTypes = Object.freeze({
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
   UNSUBSCRIBED: 'UNSUBSCRIBED',
-  TO_CONTACT: 'TO_CONTACT'
+  TO_CONTACT: 'TO_CONTACT',
+  CONTACTED: 'CONTACTED',
 });
 
 const mediumTypes = Object.freeze({

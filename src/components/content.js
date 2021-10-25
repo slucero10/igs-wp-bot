@@ -52,7 +52,7 @@ export function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export async function generar_pdf(user, id, name) {
+export async function generar_pdf(user, id, name, line) {
   let options = {
     height: art_info.height,
     width: art_info.width,
@@ -62,6 +62,9 @@ export async function generar_pdf(user, id, name) {
 
   let html = readFileSync(art_info.html_path, 'utf8');
   let URL = art_info.url_accept_assistance + user;
+  if (line.endsWith('B')) {
+    URL = URL + '_WB';
+  }
   if (art_info.product_name === 'FEMedicity' || art_info.product_name === 'FEFarmaciasEconomicas') {
     URL = URL + '&id_name=' + name;
   }
