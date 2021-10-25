@@ -64,6 +64,8 @@ export async function generar_pdf(user, id, name, line) {
   let URL = art_info.url_accept_assistance + user;
   if (line.endsWith('B')) {
     URL = URL + '_WB';
+  } else {
+    URL = URL + '_W';
   }
   if (art_info.product_name === 'FEMedicity' || art_info.product_name === 'FEFarmaciasEconomicas') {
     URL = URL + '&id_name=' + name;
