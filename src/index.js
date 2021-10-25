@@ -28,9 +28,8 @@ import {
   Responses
 } from "./components/content.js";
 import dontenv from 'dotenv';
-//import { sendToDialogFlow } from "./bot/dialogflow.js";
+import { sendToDialogFlow } from "./bot/dialogflow.js";
 import { v4 } from "uuid";
-import { Campaign } from "./graphql/campaigns_info/models/Campaigns.js";
 
 dontenv.config();
 
