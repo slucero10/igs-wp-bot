@@ -191,7 +191,7 @@ async function firstChat(client, phoneName) {
     let time_end = getRandomInt(20000, 25000);
     if (envio == true) {
       //Genera pdf
-      await generar_pdf("0", phoneName, name);
+      await generar_pdf("0", phoneName, name, phoneName);
       await delay(time_file);
       //Envía pdf
       await client
