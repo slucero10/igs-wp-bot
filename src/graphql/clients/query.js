@@ -57,6 +57,36 @@ export function checkContactStatus(number) {
   return clients.request(query);
 }
 
+export function fetchClientByPhone(number) {
+  let query = gql`
+  {
+    searchClientByPhone(number: "${number}") {
+      _id
+      name
+      identification
+      phone
+      IGS_status {
+        wp_status {
+          name
+          times_reached
+          last_reach
+          line
+        }
+        campaign_status {
+          name
+          assistance_status
+          activation_date
+          cancellation_date
+          medium
+        }
+        contact_status
+      }
+    }
+  }
+  `;
+  return clients.request(query);
+}
+
 export function createClient() {
   let mutation = gql`
       mutation {
