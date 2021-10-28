@@ -14,13 +14,13 @@ let coma = [',', '']
 let emojis = ['😀', '😱', '🥺', '😐', '👍🏻', '😠', '❤️', '🍻'];
 
 let mensaje_activacion =
-  '\nPara activar su servicio, acceda al' +
+  'Para activar su servicio, acceda al' +
   espacios[getRandomInt(0, 1)] +
   'PDF adjunto y de click en' +
   espacios[getRandomInt(0, 1)] +
-  '*Activar Asistencia* o responda con la palabra *Aceptar*.' +
+  '"Activar Asistencia".' +
   espacios[getRandomInt(0, 1)] +
-  'Contáctenos para más información' +
+  'Contáctenos para más información.' +
   puntuacion[getRandomInt(0, 1)];
 
 let art_info = new Object();
@@ -38,7 +38,6 @@ export const Responses = Object.freeze({
   unsubscribe_number: 'Disculpe las molestias, a partir de ahora ya no recibirá más información de nuestras asistencias',
   unsubscribed_number: 'Este número ya se encuentra fuera de nuestra base de datos',
   contact: 'Muchas gracias por contactarnos. Uno de nuestros operadores se comunicará con usted lo más pronto posible.',
-  accepted: 'Muchas gracias. Su servicio ya se encuentra activado desde este momento'
   /*company_info_message = 'El servicio de asistencia que le estamos ofreciendo es operado por *IGS Ecuador*, con el respaldo de *$*',
   unsuscribe_message = 'Para dejar de recibir información acerca de nuestras asistencias, por favor eliga una de las siguientes opciones:'
   + '\n1. No recibir más mensajes de esta asistencia\n2. No recibir más mensajes de esta o ninguna asistencia',

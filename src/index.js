@@ -9,8 +9,7 @@ import {
   updateCampaignStatus,
   checkCampaignStatus,
   updateContactStatus,
-  checkContactStatus,
-  fetchClientByPhone
+  checkContactStatus
 } from "./graphql/clients/query.js";
 import { fetchPhones, checkInDB } from "./graphql/phones/query.js";
 import { fetchCampaign } from "./graphql/campaigns_info/query.js";
@@ -29,7 +28,6 @@ import {
   Responses
 } from "./components/content.js";
 import dontenv from 'dotenv';
-import https from 'https';
 import { sendToDialogFlow } from "./bot/dialogflow.js";
 import { v4 } from "uuid";
 
@@ -38,11 +36,11 @@ dontenv.config();
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.Mascotas;
-const activePhones = ["5-S"];
-let startIndex = 199;
+const activePhones = ["1-V"];
+let startIndex = 0;
 let numEnvios = 350;
 let envio = true;
-let heatingLines = false;
+let heatingLines = true;
 let firstMessage = false;
 
 //Inicializar Express
@@ -52,7 +50,7 @@ connect();
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
-app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(/*campaign.collection + */'PruebaClients') }));
+app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign.collection + 'Clients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
 const campaign_info = await fetchCampaign(campaign.collection);
@@ -145,18 +143,18 @@ async function lineHeating(client, idLine, lineName) {
 
       let to_message = "";
       // Retrieve all groups
-      const groups = await client.getAllChatsGroups();
+      /*const groups = await client.getAllChatsGroups();
       if (Math.random() > 0.5 && groups.length > 0) {
         let group = randomProperty(groups);
         heatedLines.push(group.name);
         to_message = group.id.user + "@g.us";
-      } else {
+      } else {*/
         heatedLines.push(name);
         to_message = "593" + number + "@c.us";
         let contact_status = await client.checkNumberStatus(to_message);
         if (!contact_status.numberExists)
           continue;
-      }
+      //}
 
       let time_delay = getRandomInt(10000, 15000);
       let time_message = time_delay / getRandomInt(3, 5);
@@ -353,7 +351,7 @@ async function start(client, idActiveLine, phoneName, obj) {
       let response = payload.fulfillmentMessages[0].text.text[0];*/
       let number = message.from.replace('593', '').replace('@c.us', '');
       if (await setSessionAndUser(message.from)) {
-        switch (message.body.toLowerCase()) {
+        switch (message.body) {
           case '1':
             for (let reply_message of product_info.info_messages) {
               await delay(2000);
@@ -406,9 +404,6 @@ async function start(client, idActiveLine, phoneName, obj) {
             client.sendText(message.from, Responses.contact);
             console.log(message_received + message.body);
             break;
-          case 'aceptar':
-            await acceptService(client, number, message.from);
-            break;
           default:
             let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
             //let response = payload.fulfillmentMessages[0].text.text[0];
@@ -417,13 +412,9 @@ async function start(client, idActiveLine, phoneName, obj) {
             break;
         }
       } else {
-        if (message.body.toLowerCase() == 'aceptar') {
-          await acceptService(client, number, message.from);
-        } else {
-          client.sendText(message.from, 
-            Responses.welcome.replace('&A', product_info.assistance_name).replace('&C', campaign.name) + Responses.menu)
-          console.log(message_received + "FIRST_TIME_MENU");
-        }
+        client.sendText(message.from, 
+          Responses.welcome.replace('&A', product_info.assistance_name).replace('&C', campaign.name) + Responses.menu)
+        console.log(message_received + "FIRST_TIME_MENU");
       }
       /*switch (response) {
         case 'GET_INFO':
@@ -452,32 +443,6 @@ async function start(client, idActiveLine, phoneName, obj) {
     await production(client, idActiveLine, phoneName, obj);
   }
   await startLinesHeating(client, idActiveLine, phoneName);
-}
-
-async function acceptService(client, number, contact) {
-  let temp = await fetchClientByPhone(number);
-  let user = temp["searchClientByPhone"];
-  let landing_page = product_info.url_accept_assistance.replace('https://igroupsolutionec.com/', '');
-  if (user != null) {
-    const options = {
-      hostname: 'igroupsolutionec.com',
-      port: 443,
-      path: landing_page + user.identification + '_T',
-      method: 'GET'
-    };
-    const req = https.request(options, res => {
-      res.on('data', d => {
-        console.log(`ACEPTACION RECIBIDA - Http request enviado - status: ${res.statusCode}`);
-      })
-    });
-    
-    req.on('error', error => {
-      console.error(error)
-    });
-    req.end();
-    client.sendText(contact, Responses.accepted);
-  }
-
 }
 
 async function setSessionAndUser(senderId) {

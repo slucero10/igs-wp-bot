@@ -34,17 +34,6 @@ export function resolvers(collection) {
           return null;
         }
         return cursor.IGS_status.contact_status;
-      },
-      searchClientByPhone: async(_, { number }) => {
-        let cursor = new Object();
-        cursor = await Client.findOne({ phone: number });
-        if (!cursor) {
-          cursor = await Client.findOne({ phone: '0' + number });
-        }
-        if (!cursor) {
-          return null;
-        }
-        return cursor;
       }
     },
     Mutation: {
@@ -61,7 +50,7 @@ export function resolvers(collection) {
             cont.IGS_status.wp_status[index].times_reached += 1;
             cont.IGS_status.wp_status[index].name = input.name;
             cont.IGS_status.wp_status[index].last_reached = input.last_reached;
-            cont.IGS_status.wp_status[index].line = input.line;
+            cont.IGS_status.wp_status[index].line += '-' + input.line;
           }
 
         }

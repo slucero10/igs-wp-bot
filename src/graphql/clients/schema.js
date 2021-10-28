@@ -6,7 +6,6 @@ const typeDefs = `
     searchClients(current_db: String, first: Int, skip: Int): [Client]
     searchCampaignStatus(number: String, index: Int): CampaignStatus
     searchContactStatus(number: String): String
-    searchClientByPhone(number: String): Client
   }
   
   type Client {
