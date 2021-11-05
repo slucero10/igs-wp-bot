@@ -34,14 +34,14 @@ import { v4 } from "uuid";
 dontenv.config();
 
 //Inicializar variables del Bot
-const campaign = Campaigns.BGR;
-const product = campaign.products.Mascotas;
-const activePhones = ["1-V"];
+const campaign = Campaigns.FARMAENLACEMED;
+const product = campaign.products.SaludIntegral;
+const activePhones = [];
 let startIndex = 0;
 let numEnvios = 350;
 let envio = true;
 let heatingLines = true;
-let firstMessage = false;
+let firstMessage = true;
 
 //Inicializar Express
 const app = express();

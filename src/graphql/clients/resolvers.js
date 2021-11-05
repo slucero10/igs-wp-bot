@@ -50,7 +50,7 @@ export function resolvers(collection) {
             cont.IGS_status.wp_status[index].times_reached += 1;
             cont.IGS_status.wp_status[index].name = input.name;
             cont.IGS_status.wp_status[index].last_reached = input.last_reached;
-            cont.IGS_status.wp_status[index].line += '-' + input.line;
+            cont.IGS_status.wp_status[index].line += ', ' + input.line;
           }
 
         }
