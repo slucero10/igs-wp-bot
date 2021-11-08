@@ -34,9 +34,9 @@ import { v4 } from "uuid";
 dontenv.config();
 
 //Inicializar variables del Bot
-const campaign = Campaigns.FARMAENLACEMED;
-const product = campaign.products.SaludIntegral;
-const activePhones = [];
+const campaign = Campaigns.BGR;
+const product = campaign.products.CelularProtegido;
+const activePhones = ["1-A"];
 let startIndex = 0;
 let numEnvios = 350;
 let envio = true;
@@ -190,6 +190,8 @@ async function firstChat(client, phoneName) {
     let time_message = time_delay / getRandomInt(2, 4);
     let time_end = getRandomInt(20000, 25000);
     if (envio == true) {
+      await delay(time_message);
+      await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje());
       //Genera pdf
       await generar_pdf("0", phoneName, name, phoneName);
       await delay(time_file);
@@ -207,8 +209,8 @@ async function firstChat(client, phoneName) {
         .catch((error) => {
           //console.error('Error when sending: ', error); //return object error
         });
-      await delay(time_message);
-      await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje()); //name
+      //await delay(time_message);
+      //await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje());
       //Mensaje Completo
       //await client.sendText(contact, mensaje());
       console.log("Primer envío completado");
@@ -268,6 +270,8 @@ async function production(client, idActiveLine, phoneName, obj) {
         let time_end = getRandomInt(40000, 50000);
         if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE && 
           contact_st != WP_status.UNSUBSCRIBED) {
+          await delay(time_message);
+          await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
           //Genera pdf
           await generar_pdf(identificacion, phoneName, name);
           await delay(time_file);
@@ -285,13 +289,12 @@ async function production(client, idActiveLine, phoneName, obj) {
             .catch((error) => {
               //console.error('Error when sending: ', error); //return object error
             });
-          await delay(time_message);
-          await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
-          //await client.sendText(contact, mensaje(campaign_info.name + '-' + campaign_info.pdf_name));
+          //await delay(time_message);
+          //await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
           updateClient(
             obj[index]._id,
             product_info.product_name,
-            new Date(),
+            start_t,
             phoneName,
             product
           );
@@ -308,6 +311,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         console.log(
           `NO Index [${index}] ${obj[index].name} telf:${contact} (Total no existen: ${num_noexiste})`
         );
+        await updateContactStatus(number, WP_status.UNREACHABLE);
       }
     }
   }

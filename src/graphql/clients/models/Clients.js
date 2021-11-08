@@ -8,6 +8,7 @@ const StatusTypes = Object.freeze({
   UNSUBSCRIBED: 'UNSUBSCRIBED',
   TO_CONTACT: 'TO_CONTACT',
   CONTACTED: 'CONTACTED',
+  UNREACHABLE: 'UNREACHABLE',
 });
 
 const mediumTypes = Object.freeze({
@@ -61,10 +62,10 @@ const campaignStatusSchema = new Schema(
       enum: Object.values(StatusTypes), 
     },
     activation_date: {
-      type: String
+      type: Date
     },
     cancellation_date: {
-      type: String
+      type: Date
     },
     medium: {
       type: String,
