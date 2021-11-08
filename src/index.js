@@ -245,7 +245,7 @@ async function production(client, idActiveLine, phoneName, obj) {
     let start_t = new Date();
     let identificacion = obj[index].identification;
     let name = getName(obj[index].name);
-    let contact = obj[index].phone;
+    let number = obj[index].phone;
     let campaign_status = null;
     let contact_st = null;
     if (obj[index].IGS_status != null) {
@@ -256,8 +256,8 @@ async function production(client, idActiveLine, phoneName, obj) {
         contact_st = obj[index].IGS_status.contact_status;
       }
     }
-    if (contact != null) {
-      contact = "593" + contact + "@c.us";
+    if (number != null) {
+      let contact = "593" + number + "@c.us";
       let contact_status = await client.checkNumberStatus(contact);
       if (contact_status.numberExists) {
         num_existe++;
