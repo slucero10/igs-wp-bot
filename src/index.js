@@ -59,7 +59,7 @@ const sessionIds = new Map();
 
 async function botInit() {
   setArtInfo(product_info);
-  let skip = startIndex + (numEnvios * activePhones.length);
+  let skip = startIndex + (numEnvios * activePhones.length) + 500;
   let users = await fetchClients(campaign.current_db, startIndex, skip);
   let usersObj = users["searchClients"];
   let phones = await fetchPhones();
