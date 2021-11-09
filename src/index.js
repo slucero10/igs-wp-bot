@@ -5,6 +5,7 @@ import { connect } from "./database.js";
 import { Campaigns } from "./bot/config.js";
 import {
   fetchClients,
+  fetchClientByPhone,
   updateClient,
   updateCampaignStatus,
   checkCampaignStatus,
@@ -37,11 +38,11 @@ dontenv.config();
 const campaign = Campaigns.BGR;
 const product = campaign.products.CelularProtegido;
 const activePhones = ["1-A"];
-let startIndex = 0;
+let startIndex = 199;
 let numEnvios = 350;
 let envio = true;
-let heatingLines = true;
-let firstMessage = true;
+let heatingLines = false;
+let firstMessage = false;
 
 //Inicializar Express
 const app = express();
@@ -50,7 +51,7 @@ connect();
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
-app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign.collection + 'Clients') }));
+app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(/*campaign.collection +*/ 'PruebaClients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
 const campaign_info = await fetchCampaign(campaign.collection);
@@ -149,11 +150,11 @@ async function lineHeating(client, idLine, lineName) {
         heatedLines.push(group.name);
         to_message = group.id.user + "@g.us";
       } else {*/
-        heatedLines.push(name);
-        to_message = "593" + number + "@c.us";
-        let contact_status = await client.checkNumberStatus(to_message);
-        if (!contact_status.numberExists)
-          continue;
+      heatedLines.push(name);
+      to_message = "593" + number + "@c.us";
+      let contact_status = await client.checkNumberStatus(to_message);
+      if (!contact_status.numberExists)
+        continue;
       //}
 
       let time_delay = getRandomInt(10000, 15000);
@@ -268,7 +269,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         let time_file = time_delay / getRandomInt(4, 10);
         let time_message = time_delay / getRandomInt(3, 8);
         let time_end = getRandomInt(40000, 50000);
-        if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE && 
+        if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE &&
           contact_st != WP_status.UNSUBSCRIBED) {
           await delay(time_message);
           await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
@@ -354,6 +355,8 @@ async function start(client, idActiveLine, phoneName, obj) {
       let payload = await sendToDialogFlow(message.body, session, phoneName);
       let response = payload.fulfillmentMessages[0].text.text[0];*/
       let number = message.from.replace('593', '').replace('@c.us', '');
+      let searchClient = await fetchClientByPhone(number);
+      let user_info = searchClient['searchClientByPhone'];
       if (await setSessionAndUser(message.from)) {
         switch (message.body) {
           case '1':
@@ -411,13 +414,12 @@ async function start(client, idActiveLine, phoneName, obj) {
           default:
             let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
             //let response = payload.fulfillmentMessages[0].text.text[0];
-            client.sendText(message.from, Responses.choose_option + Responses.menu);
+            sendMenu(false, user_info, client, message.from);
             console.log(message_received + "MENU");
             break;
         }
       } else {
-        client.sendText(message.from, 
-          Responses.welcome.replace('&A', product_info.assistance_name).replace('&C', campaign.name) + Responses.menu)
+        sendMenu(true, user_info, client, message.from);
         console.log(message_received + "FIRST_TIME_MENU");
       }
       /*switch (response) {
@@ -447,6 +449,26 @@ async function start(client, idActiveLine, phoneName, obj) {
     await production(client, idActiveLine, phoneName, obj);
   }
   await startLinesHeating(client, idActiveLine, phoneName);
+}
+
+function sendMenu(firstTime, user, client, contact) {
+  if (firstTime) {
+    if (user != null && user.identification != undefined) {
+      client.sendText(contact,
+        Responses.welcome.replace('&A', product_info.assistance_name).replace('&C', campaign.name)
+          .replace('&L', Responses.link + product_info.url_accept_assistance + user.identification + ' o') + Responses.menu);
+    } else {
+      client.sendText(contact,
+        Responses.welcome.replace('&A', product_info.assistance_name).replace('&C', campaign.name).replace('&L', '') + Responses.menu);
+    }
+  } else {
+    if (user != null && user.identification != undefined) {
+      client.sendText(contact, Responses.choose_option + Responses.menu + '\nO ' 
+      + Responses.link + product_info.url_accept_assistance + user.identification);
+    } else {
+      client.sendText(contact, Responses.choose_option + Responses.menu);
+    }
+  }
 }
 
 async function setSessionAndUser(senderId) {

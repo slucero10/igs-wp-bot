@@ -4,6 +4,7 @@ import { resolvers } from './resolvers.js';
 const typeDefs = `
   type Query {
     searchClients(current_db: String, first: Int, skip: Int): [Client]
+    searchClientByPhone(phone: String): Client
     searchCampaignStatus(number: String, index: Int): CampaignStatus
     searchContactStatus(number: String): String
   }
@@ -41,10 +42,7 @@ const typeDefs = `
     contact_status: String
   }
   
-  type Mutation {
-    createClientTC(input: ClientInput): Client
-    createClientC(input: ClientInput): Client
-    
+  type Mutation {    
     updateWPStatus(_id: ID,index: Int,input: WPStatusInput): WPStatus
     updateCampaignStatus(phone: String,index: Int,input: CampaignStatusInput): CampaignStatus
     updateContactStatus(phone: String,input: ContactStatusInput): ContactStatus
@@ -71,6 +69,7 @@ const typeDefs = `
     contact_status: String
   }
 `;
+
 export function serverSchema(collection) {
   return makeExecutableSchema({
     typeDefs: typeDefs,

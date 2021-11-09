@@ -24,16 +24,7 @@ type CampaignInfo {
     cost_message: String
     accept_message: String
 }
-
-type Mutation {
-    createCampaign(input: CampaignInput): Campaign
-  }
-  
-  input CampaignInput {
-    name: String
-  }
 `;
-
 
 export default makeExecutableSchema({
   typeDefs: typeDefs,

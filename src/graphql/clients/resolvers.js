@@ -34,7 +34,15 @@ export function resolvers(collection) {
           return null;
         }
         return cursor.IGS_status.contact_status;
-      }
+      },
+      searchClientByPhone: async(_, { phone }) => {
+        let cursor = new Object();
+        cursor = await Client.findOne({ phone: phone });
+        if (!cursor) {
+          cursor = await Client.findOne({ phone: '0' + phone });
+        }
+        return cursor;
+      },
     },
     Mutation: {
       updateWPStatus: async (_, { _id, index, input }) => {

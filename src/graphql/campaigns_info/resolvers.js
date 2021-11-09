@@ -7,11 +7,4 @@ export const resolvers = {
             return cursor;
         },
     },
-    Mutation: {
-        createCampaign: async (_, { input }) => {
-          let campaign = new Campaign(input);
-          await campaign.save();
-          return campaign;
-        },
-      },
 };

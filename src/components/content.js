@@ -26,7 +26,7 @@ let mensaje_activacion =
 let art_info = new Object();
 
 export const Responses = Object.freeze({
-  welcome: 'Muchas gracias por comunicarse con nosotros y su interés en nuestra &A exclusivo para clientes &C. Por favor, elija una de las siguientes opciones:',
+  welcome: 'Muchas gracias por comunicarse con nosotros y su interés en nuestra &A exclusivo para clientes &C. Por favor, &L elija una de las siguientes opciones:',
   choose_option: 'Opción no válida, por favor elija una de las opciones del menú:',
   menu: '\n1. Más información\n2. Costo de la asistencia\n3. Activar la asistencia\n4. Dejar de recibir información acerca de este servicio'
     +'\n5. Dejar de recibir información de esta o cualquier otra asistencia\n6. Quiero que me contacten',
@@ -38,10 +38,7 @@ export const Responses = Object.freeze({
   unsubscribe_number: 'Disculpe las molestias, a partir de ahora ya no recibirá más información de nuestras asistencias',
   unsubscribed_number: 'Este número ya se encuentra fuera de nuestra base de datos',
   contact: 'Muchas gracias por contactarnos. Uno de nuestros operadores se comunicará con usted lo más pronto posible.',
-  /*company_info_message = 'El servicio de asistencia que le estamos ofreciendo es operado por *IGS Ecuador*, con el respaldo de *$*',
-  unsuscribe_message = 'Para dejar de recibir información acerca de nuestras asistencias, por favor eliga una de las siguientes opciones:'
-  + '\n1. No recibir más mensajes de esta asistencia\n2. No recibir más mensajes de esta o ninguna asistencia',
-  wrong_number_message: 'Disculpe por los inconvenientes, desde ahora ya no recibirá más mensajes a este número',*/
+  link: 'active su servicio haciendo clic en el siguiente enlace: ',
 });
 
 export function setArtInfo(obj) {

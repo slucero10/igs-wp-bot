@@ -33,6 +33,36 @@ export function fetchClients(current_db, first, skip) {
   return clients.request(query);
 }
 
+export function fetchClientByPhone(number) {
+  let query = gql`
+      {
+        searchClientByPhone(phone: "${number}") {
+          _id
+          name
+          identification
+          phone
+          IGS_status {
+            wp_status {
+              name
+              times_reached
+              last_reach
+              line
+            }
+            campaign_status {
+              name
+              assistance_status
+              activation_date
+              cancellation_date
+              medium
+            }
+            contact_status
+          }
+        }
+      }
+    `;
+  return clients.request(query);
+}
+
 export function checkCampaignStatus(number, index) {
   let query = gql`
     {
@@ -55,23 +85,6 @@ export function checkContactStatus(number) {
     }
   `;
   return clients.request(query);
-}
-
-export function createClient() {
-  let mutation = gql`
-      mutation {
-        createClientC(
-          input: {
-            name: "Client"
-            identification: "124431"
-            phone: "0994243234"
-          }
-        ) {
-          _id
-        }
-      }
-    `;
-  return clients.request(mutation);
 }
 
 export function updateClient(id, campaign, date, line, index) {

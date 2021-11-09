@@ -24,19 +24,3 @@ export function fetchCampaign(name) {
   `;
     return client.request(query);
 }
-
-export function createCampaign() {
-    let mutation = null;
-    mutation = gql`
-        mutation {
-          createCampaign(
-            input: {
-              name: "Campaign"
-            }
-          ) {
-            _id
-          }
-        }
-      `;
-    return client.request(mutation);
-}

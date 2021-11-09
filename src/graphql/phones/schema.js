@@ -23,20 +23,6 @@ const typeDefs = `
     ACTIVE
     BANNED
   }
-  
-
-  type Mutation {
-    createPhone(input: PhoneInput): Phone
-    deletePhone(_id: ID!): Phone
-    updatePhone(_id: ID!, input: PhoneInput): Phone
-  }
-  
-  input PhoneInput {
-    name: String
-    number: String
-    status: Status
-    campaign: String
-  }
 `;
 
 export default makeExecutableSchema({
