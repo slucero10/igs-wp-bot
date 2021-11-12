@@ -2,16 +2,16 @@ import { create } from 'pdf-creator-node';
 import { readFileSync } from 'fs';
 import randomWords from "random-words";
 
-let palabras = [
+const palabras = [
   ' estimado/a',
   ' estimado/a Sr/a',
   ', estimado/a',
   ', estimado/a Sr/a',
 ];
-let espacios = [' ', '  '];
-let puntuacion = ['.', ' '];
-let coma = [',', '']
-let emojis = ['😀', '😱', '🥺', '😐', '👍🏻', '😠', '❤️', '🍻'];
+const espacios = [' ', '  '];
+const puntuacion = ['.', ' '];
+const coma = [',', '']
+const emojis = ['😀', '😱', '🥺', '😐', '👍🏻', '😠', '❤️', '🍻'];
 
 let mensaje_activacion =
   'Para activar su servicio, acceda al' +
@@ -26,7 +26,7 @@ let mensaje_activacion =
 let art_info = new Object();
 
 export const Responses = Object.freeze({
-  welcome: 'Muchas gracias por comunicarse con nosotros y su interés en nuestra &A exclusivo para clientes &C. Por favor, &L elija una de las siguientes opciones:',
+  welcome: 'Muchas gracias por comunicarse con nosotros y su interés en nuestra &A exclusivo para clientes &C. &L elija una de las siguientes opciones:',
   choose_option: 'Opción no válida, por favor elija una de las opciones del menú:',
   menu: '\n1. Más información\n2. Costo de la asistencia\n3. Activar la asistencia\n4. Dejar de recibir información acerca de este servicio'
     +'\n5. Dejar de recibir información de esta o cualquier otra asistencia\n6. Quiero que me contacten',
@@ -38,7 +38,7 @@ export const Responses = Object.freeze({
   unsubscribe_number: 'Disculpe las molestias, a partir de ahora ya no recibirá más información de nuestras asistencias',
   unsubscribed_number: 'Este número ya se encuentra fuera de nuestra base de datos',
   contact: 'Muchas gracias por contactarnos. Uno de nuestros operadores se comunicará con usted lo más pronto posible.',
-  link: 'active su servicio haciendo clic en el siguiente enlace: ',
+  link: 'Puede activar su servicio haciendo clic en el siguiente enlace: ',
 });
 
 export function setArtInfo(obj) {
@@ -58,12 +58,7 @@ export async function generar_pdf(user, id, name) {
   };
 
   let html = readFileSync(art_info.html_path, 'utf8');
-  let URL = art_info.url_accept_assistance + user;
-  if (id.endsWith('B')) {
-    URL = URL + '_WB';
-  } else {
-    URL = URL + '_W';
-  }
+  let URL = art_info.url_accept_assistance + user + '_' + id.replace('-', '');
   if (art_info.product_name === 'FEMedicity' || art_info.product_name === 'FEFarmaciasEconomicas') {
     URL = URL + '&id_name=' + name;
   }

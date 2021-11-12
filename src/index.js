@@ -43,6 +43,11 @@ let numEnvios = 350;
 let envio = true;
 let heatingLines = false;
 let firstMessage = false;
+let pdfOnly = true;
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
 
 //Inicializar Express
 const app = express();
@@ -191,10 +196,12 @@ async function firstChat(client, phoneName) {
     let time_message = time_delay / getRandomInt(2, 4);
     let time_end = getRandomInt(20000, 25000);
     if (envio == true) {
-      await delay(time_message);
-      await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje());
+      if(!pdfOnly){
+        await delay(time_message);
+        await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje());
+      }
       //Genera pdf
-      await generar_pdf("0", phoneName, name, phoneName);
+      await generar_pdf("0", phoneName, name);
       await delay(time_file);
       //Envía pdf
       await client
@@ -259,9 +266,17 @@ async function production(client, idActiveLine, phoneName, obj) {
     }
     if (number != null) {
       let contact = "593" + number + "@c.us";
-      let contact_status = await client.checkNumberStatus(contact);
-      if (contact_status.numberExists) {
+      let contact_exists = false;
+      try{
+        let contact_status = await client.checkNumberStatus(contact);
+        contact_exists = contact_status.numberExists;
+      } catch (error){
+        console.error(error);
+      }
+
+      if (contact_exists) {
         num_existe++;
+        cont++;
         console.log(
           `[${startIndex + index}] [${phoneName}] ${obj[index].name} telf:${contact} id:${identificacion} (Total si existen: ${num_existe})`
         );
@@ -271,8 +286,10 @@ async function production(client, idActiveLine, phoneName, obj) {
         let time_end = getRandomInt(40000, 50000);
         if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE &&
           contact_st != WP_status.UNSUBSCRIBED) {
-          await delay(time_message);
-          await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
+          if(!pdfOnly){
+            await delay(time_message);
+            await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
+          }
           //Genera pdf
           await generar_pdf(identificacion, phoneName, name);
           await delay(time_file);
@@ -313,6 +330,7 @@ async function production(client, idActiveLine, phoneName, obj) {
           `NO Index [${index}] ${obj[index].name} telf:${contact} (Total no existen: ${num_noexiste})`
         );
         await updateContactStatus(number, WP_status.UNREACHABLE);
+        delay(1000);
       }
     }
   }
