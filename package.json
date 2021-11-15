@@ -21,12 +21,11 @@
     "graphql-tools": "^8.1.0",
     "mongoose": "^5.13.5",
     "pdf-creator-node": "^2.2.3",
+    "puppeteer": "^8.0.0",
+    "puppeteer-extra": "^3.1.18",
+    "puppeteer-extra-plugin-stealth": "^2.9.0",
     "random-words": "^1.1.1",
     "uuid": "^8.3.2",
-    "venom-bot": "^3.1.4"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.15.0",
-    "@babel/node": "^7.14.9"
+    "venom-bot": "^3.1.12"
   }
 }
