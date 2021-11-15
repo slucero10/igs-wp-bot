@@ -31,17 +31,18 @@ import {
 import dontenv from 'dotenv';
 import { sendToDialogFlow } from "./bot/dialogflow.js";
 import { v4 } from "uuid";
-
+import { appendFile } from "fs";
+ 
 dontenv.config();
 
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.CelularProtegido;
-const activePhones = [];
-let startIndex = 0;
-let numEnvios = 350;
-let envio = true;
-let heatingLines = false;
+const activePhones = ["13-S"];
+const startIndex = 0;
+const numEnvios = 350;
+const envio = true;
+const heatingLines = false;
 let firstMessage = false;
 let pdfOnly = true;
 process.on('unhandledRejection', (reason, p) => {
@@ -59,6 +60,13 @@ app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }
 app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign.collection + 'Clients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
+const log_date = new Date().toISOString().replace(/T.+/, '');
+if (envio) {
+  appendFile(`src/log_files/${log_date}.log`, `${new Date()}\n`,(err) => {
+    if (err) throw err;
+    console.log('Log file created');
+  });
+}
 const campaign_info = await fetchCampaign(campaign.collection);
 const product_info = campaign_info["searchCampaign"].products[product];
 const sessionIds = new Map();
@@ -244,9 +252,6 @@ async function production(client, idActiveLine, phoneName, obj) {
     index <= lengthLines - 1;
     index = index + activePhones.length
   ) {
-    if (cont >= numEnvios) {
-      break;
-    }
     if (cont % 10 === 0 && cont !== 0) {
       await lineHeating(client, idActiveLine, phoneName);
     }
@@ -320,6 +325,11 @@ async function production(client, idActiveLine, phoneName, obj) {
           console.log(
             `Envío (${cont}) de ${phoneName} Terminado, esperando ${time_end / 1000}s para el próximo envío`
           );
+          if (cont % 10 === 0 && cont !== 0) {
+            appendFile(`src/log_files/${log_date}.log`, `[${phoneName}] ${cont} mensajes enviados\n`,(err) => {
+              if (err) throw err;
+            });
+          }
           await delay(time_end);
         } else {
           await delay(7000);
@@ -333,11 +343,20 @@ async function production(client, idActiveLine, phoneName, obj) {
         delay(1000);
       }
     }
+    if (cont >= numEnvios) {
+      break;
+    }
   }
+  const totalTime = (new Date() - startdate) / 60000;
   console.log(
-    `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: ${(new Date() - startdate) / 60000
-    } minutos (${cont} mensajes enviados)`
+    `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: ${totalTime} minutos (${cont} mensajes enviados)`
   );
+  if (envio) {
+    appendFile(`src/log_files/${log_date}.log`, `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: 
+    ${totalTime} minutos (${cont} mensajes enviados)\n`,(err) => {
+      if (err) throw err;
+    });
+  }
   await delay(getRandomInt(600000, 900000));
 }
 

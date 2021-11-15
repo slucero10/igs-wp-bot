@@ -4,3 +4,5 @@ tokens
 .env
 /src/components/pdf/*
 !/src/components/pdf/.gitkeep
+/src/log_files/*
+!/src/log_files/.gitkeep
