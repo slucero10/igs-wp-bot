@@ -32,22 +32,22 @@ import dontenv from 'dotenv';
 import { sendToDialogFlow } from "./bot/dialogflow.js";
 import { v4 } from "uuid";
 import { appendFile } from "fs";
- 
+
 dontenv.config();
 
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
-const product = campaign.products.CelularProtegido;
-const activePhones = ["13-S"];
+const product = campaign.products.Mascotas;
+const activePhones = ["11-S"/*, "13-S", "11-SB", "13-SB"*/];
 const startIndex = 0;
 const numEnvios = 350;
 const envio = true;
-const heatingLines = false;
-let firstMessage = false;
+const heatingLines = true;
+let firstMessage = true;
 let pdfOnly = true;
+
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-  // application specific logging, throwing an error, or other logic here
 });
 
 //Inicializar Express
@@ -61,10 +61,10 @@ app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campa
 app.listen(3000, () => console.log("Server on port 3000"));
 
 const log_date = new Date().toISOString().replace(/T.+/, '');
-if (envio) {
-  appendFile(`src/log_files/${log_date}.log`, `${new Date()}\n`,(err) => {
+if (envio && !heatingLines) {
+  appendFile(`src/log_files/${log_date}.log`, `${new Date()}\n`, (err) => {
     if (err) throw err;
-    console.log('Log file created');
+    console.log('\nLog file created');
   });
 }
 const campaign_info = await fetchCampaign(campaign.collection);
@@ -95,7 +95,9 @@ async function botInit() {
           //Create session wss return "serverClose" case server for close
           console.log("Session name: ", session);
         },
-        undefined
+        {
+          multidevice: false
+        }
       )
         .then((client) => {
           start(client, idActiveLine, phoneName, usersObj);
@@ -157,7 +159,7 @@ async function lineHeating(client, idLine, lineName) {
 
       let to_message = "";
       // Retrieve all groups
-      /*const groups = await client.getAllChatsGroups();
+      /*const chats = await client.getAllChatsGroups();
       if (Math.random() > 0.5 && groups.length > 0) {
         let group = randomProperty(groups);
         heatedLines.push(group.name);
@@ -195,16 +197,16 @@ async function lineHeating(client, idLine, lineName) {
 
 async function firstChat(client, phoneName) {
   let start_t = new Date();
-  let contact = "593" + "980535586" + "@c.us"; //980535586 andres  992900544 juan
+  let contact = "593" + "999080082" + "@c.us"; //980535586 andres  992900544 juan
   let name = "ANDRES";
-  let contact_status = await client.checkNumberStatus(contact);
+  let contact_status = await client.getNumberProfile(contact);
   if (contact_status.numberExists) {
     let time_delay = getRandomInt(10000, 15000);
     let time_file = time_delay / getRandomInt(3, 6);
     let time_message = time_delay / getRandomInt(2, 4);
     let time_end = getRandomInt(20000, 25000);
     if (envio == true) {
-      if(!pdfOnly){
+      if (!pdfOnly) {
         await delay(time_message);
         await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje());
       }
@@ -271,17 +273,9 @@ async function production(client, idActiveLine, phoneName, obj) {
     }
     if (number != null) {
       let contact = "593" + number + "@c.us";
-      let contact_exists = false;
-      try{
-        let contact_status = await client.checkNumberStatus(contact);
-        contact_exists = contact_status.numberExists;
-      } catch (error){
-        console.error(error);
-      }
-
-      if (contact_exists) {
+      let contact_status = await client.checkNumberStatus(contact);
+      if (contact_status.numberExists) {
         num_existe++;
-        cont++;
         console.log(
           `[${startIndex + index}] [${phoneName}] ${obj[index].name} telf:${contact} id:${identificacion} (Total si existen: ${num_existe})`
         );
@@ -291,7 +285,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         let time_end = getRandomInt(40000, 50000);
         if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE &&
           contact_st != WP_status.UNSUBSCRIBED) {
-          if(!pdfOnly){
+          if (!pdfOnly) {
             await delay(time_message);
             await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
           }
@@ -325,8 +319,8 @@ async function production(client, idActiveLine, phoneName, obj) {
           console.log(
             `Envío (${cont}) de ${phoneName} Terminado, esperando ${time_end / 1000}s para el próximo envío`
           );
-          if (cont % 10 === 0 && cont !== 0) {
-            appendFile(`src/log_files/${log_date}.log`, `[${phoneName}] ${cont} mensajes enviados\n`,(err) => {
+          if (cont % 25 === 0 && cont !== 0) {
+            appendFile(`src/log_files/${log_date}.log`, `[${phoneName}] ${cont} mensajes enviados\n`, (err) => {
               if (err) throw err;
             });
           }
@@ -353,7 +347,7 @@ async function production(client, idActiveLine, phoneName, obj) {
   );
   if (envio) {
     appendFile(`src/log_files/${log_date}.log`, `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: 
-    ${totalTime} minutos (${cont} mensajes enviados)\n`,(err) => {
+    ${totalTime} minutos (${cont} mensajes enviados)\n`, (err) => {
       if (err) throw err;
     });
   }
@@ -479,8 +473,8 @@ async function start(client, idActiveLine, phoneName, obj) {
     }
   });
   if (firstMessage) {
-    await firstChat(client, phoneName);
     firstMessage = false;
+    await firstChat(client, phoneName);
   }
   if (!heatingLines) {
     await production(client, idActiveLine, phoneName, obj);
@@ -500,8 +494,8 @@ function sendMenu(firstTime, user, client, contact) {
     }
   } else {
     if (user != null && user.identification != undefined) {
-      client.sendText(contact, Responses.choose_option + Responses.menu + '\nO ' 
-      + Responses.link + product_info.url_accept_assistance + user.identification);
+      client.sendText(contact, Responses.choose_option + Responses.menu + '\nO '
+        + Responses.link + product_info.url_accept_assistance + user.identification);
     } else {
       client.sendText(contact, Responses.choose_option + Responses.menu);
     }
