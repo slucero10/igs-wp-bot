@@ -167,7 +167,7 @@ async function lineHeating(client, idLine, lineName) {
       } else {*/
       heatedLines.push(name);
       to_message = "593" + number + "@c.us";
-      let contact_status = await client.checkNumberStatus(to_message);
+      let contact_status = await client.getNumberProfile(to_message);
       if (!contact_status.numberExists)
         continue;
       //}
@@ -273,7 +273,7 @@ async function production(client, idActiveLine, phoneName, obj) {
     }
     if (number != null) {
       let contact = "593" + number + "@c.us";
-      let contact_status = await client.checkNumberStatus(contact);
+      let contact_status = await client.getNumberProfile(contact);
       if (contact_status.numberExists) {
         num_existe++;
         console.log(
