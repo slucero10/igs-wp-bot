@@ -38,12 +38,12 @@ dontenv.config();
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.Mascotas;
-const activePhones = ["11-S"/*, "13-S", "11-SB", "13-SB"*/];
+const activePhones = ["1-S"/*,"2-S", "3-S", "4-S"*/];
 const startIndex = 0;
-const numEnvios = 350;
+const numEnvios = 150;
 const envio = true;
-const heatingLines = true;
-let firstMessage = true;
+const heatingLines = false;
+let firstMessage = false;
 let pdfOnly = true;
 
 process.on('unhandledRejection', (reason, p) => {
@@ -57,7 +57,7 @@ connect();
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
-app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign.collection + 'Clients') }));
+app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(/*campaign.collection + 'Clients5'*/ 'PruebaClients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
 const log_date = new Date().toISOString().replace(/T.+/, '');
@@ -167,8 +167,15 @@ async function lineHeating(client, idLine, lineName) {
       } else {*/
       heatedLines.push(name);
       to_message = "593" + number + "@c.us";
-      let contact_status = await client.getNumberProfile(to_message);
-      if (!contact_status.numberExists)
+      let contact_exists = null;
+      await client.checkNumberStatus(contact)        
+      .then((result) => {
+        contact_exists = result.numberExists;
+      })
+      .catch((error) => {
+        contact_exists = false;
+      });
+      if (!contact_exists)
         continue;
       //}
 
@@ -199,8 +206,15 @@ async function firstChat(client, phoneName) {
   let start_t = new Date();
   let contact = "593" + "999080082" + "@c.us"; //980535586 andres  992900544 juan
   let name = "ANDRES";
-  let contact_status = await client.getNumberProfile(contact);
-  if (contact_status.numberExists) {
+  let contact_exists = null;
+  await client.checkNumberStatus(contact)        
+  .then((result) => {
+    contact_exists = result.numberExists;
+  })
+  .catch((error) => {
+    contact_exists = false;
+  });
+  if (contact_exists) {
     let time_delay = getRandomInt(10000, 15000);
     let time_file = time_delay / getRandomInt(3, 6);
     let time_message = time_delay / getRandomInt(2, 4);
@@ -273,8 +287,15 @@ async function production(client, idActiveLine, phoneName, obj) {
     }
     if (number != null) {
       let contact = "593" + number + "@c.us";
-      let contact_status = await client.getNumberProfile(contact);
-      if (contact_status.numberExists) {
+      let contact_exists = null;
+      await client.checkNumberStatus(contact)        
+      .then((result) => {
+        contact_exists = result.numberExists;
+      })
+      .catch((error) => {
+        contact_exists = false;
+      });
+      if (contact_exists) {
         num_existe++;
         console.log(
           `[${startIndex + index}] [${phoneName}] ${obj[index].name} telf:${contact} id:${identificacion} (Total si existen: ${num_existe})`
