@@ -38,13 +38,13 @@ dontenv.config();
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.Mascotas;
-const activePhones = ["1-S","2-S", "3-S", "4-S"];
+const activePhones = ["1-A"];
 const startIndex = 2;
 const numEnvios = 150;
 const envio = true;
-const heatingLines = false;
-let firstMessage = false;
-let pdfOnly = true;
+const heatingLines = true;
+let firstMessage = true;
+let pdfOnly = false;
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
@@ -204,7 +204,7 @@ async function lineHeating(client, idLine, lineName) {
 
 async function firstChat(client, phoneName) {
   let start_t = new Date();
-  let contact = "593" + "999080082" + "@c.us"; //980535586 andres  992900544 juan
+  let contact = "593" + "983831821" + "@c.us"; //980535586 andres  992900544 juan
   let name = "ANDRES";
   let contact_exists = null;
   await client.checkNumberStatus(contact)        

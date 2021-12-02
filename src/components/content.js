@@ -20,7 +20,7 @@ let mensaje_activacion =
   espacios[getRandomInt(0, 1)] +
   '"Activar Asistencia".' +
   espacios[getRandomInt(0, 1)] +
-  'Contáctenos para más información.' +
+  'Contáctenos para más información' +
   puntuacion[getRandomInt(0, 1)];
 
 let art_info = new Object();
