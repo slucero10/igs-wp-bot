@@ -36,8 +36,8 @@ import { appendFile } from "fs";
 dontenv.config();
 
 //Inicializar variables del Bot
-const campaign = Campaigns.BGR;
-const product = campaign.products.Mascotas;
+const campaign = Campaigns.ANDALUCIA;
+const product = campaign.products.AsistenciaSalud;
 const activePhones = ["1-A"];
 const startIndex = 2;
 const numEnvios = 150;
@@ -204,7 +204,7 @@ async function lineHeating(client, idLine, lineName) {
 
 async function firstChat(client, phoneName) {
   let start_t = new Date();
-  let contact = "593" + "983831821" + "@c.us"; //980535586 andres  992900544 juan
+  let contact = "593" + "980535586" + "@c.us"; //980535586 andres  992900544 juan
   let name = "ANDRES";
   let contact_exists = null;
   await client.checkNumberStatus(contact)        
