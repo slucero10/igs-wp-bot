@@ -168,13 +168,13 @@ async function lineHeating(client, idLine, lineName) {
       heatedLines.push(name);
       to_message = "593" + number + "@c.us";
       let contact_exists = null;
-      await client.checkNumberStatus(to_message)        
-      .then((result) => {
-        contact_exists = result.numberExists;
-      })
-      .catch((error) => {
-        contact_exists = false;
-      });
+      await client.checkNumberStatus(to_message)
+        .then((result) => {
+          contact_exists = result.numberExists;
+        })
+        .catch((error) => {
+          contact_exists = false;
+        });
       if (!contact_exists)
         continue;
       //}
@@ -207,13 +207,13 @@ async function firstChat(client, phoneName) {
   let contact = "593" + "980535586" + "@c.us"; //980535586 andres  992900544 juan
   let name = "ANDRES";
   let contact_exists = null;
-  await client.checkNumberStatus(contact)        
-  .then((result) => {
-    contact_exists = result.numberExists;
-  })
-  .catch((error) => {
-    contact_exists = false;
-  });
+  await client.checkNumberStatus(contact)
+    .then((result) => {
+      contact_exists = result.numberExists;
+    })
+    .catch((error) => {
+      contact_exists = false;
+    });
   if (contact_exists) {
     let time_delay = getRandomInt(10000, 15000);
     let time_file = time_delay / getRandomInt(3, 6);
@@ -288,13 +288,13 @@ async function production(client, idActiveLine, phoneName, obj) {
     if (number != null) {
       let contact = "593" + number + "@c.us";
       let contact_exists = null;
-      await client.checkNumberStatus(contact)        
-      .then((result) => {
-        contact_exists = result.numberExists;
-      })
-      .catch((error) => {
-        contact_exists = false;
-      });
+      await client.checkNumberStatus(contact)
+        .then((result) => {
+          contact_exists = result.numberExists;
+        })
+        .catch((error) => {
+          contact_exists = false;
+        });
       if (contact_exists) {
         num_existe++;
         console.log(
@@ -355,7 +355,7 @@ async function production(client, idActiveLine, phoneName, obj) {
           `NO Index [${index}] ${obj[index].name} telf:${contact} (Total no existen: ${num_noexiste})`
         );
         await updateContactStatus(number, WP_status.UNREACHABLE);
-        delay(1000);
+        await delay(1000);
       }
     }
     if (cont >= numEnvios) {
