@@ -38,12 +38,12 @@ dontenv.config();
 //Inicializar variables del Bot
 const campaign = Campaigns.ANDALUCIA;
 const product = campaign.products.AsistenciaSalud;
-const activePhones = ["1-A"];
+const activePhones = ["15-S"];
 const startIndex = 2;
 const numEnvios = 150;
 const envio = true;
 const heatingLines = true;
-let firstMessage = true;
+let firstMessage = false;
 let pdfOnly = false;
 
 process.on('unhandledRejection', (reason, p) => {
@@ -410,6 +410,8 @@ async function start(client, idActiveLine, phoneName, obj) {
       let searchClient = await fetchClientByPhone(number);
       let user_info = searchClient['searchClientByPhone'];
       if (await setSessionAndUser(message.from)) {
+        let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
+        //let response = payload.fulfillmentMessages[0].text.text[0];
         switch (message.body) {
           case '1':
             for (let reply_message of product_info.info_messages) {
@@ -471,6 +473,8 @@ async function start(client, idActiveLine, phoneName, obj) {
             break;
         }
       } else {
+        let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
+        //let response = payload.fulfillmentMessages[0].text.text[0];
         sendMenu(true, user_info, client, message.from);
         console.log(message_received + "FIRST_TIME_MENU");
       }
