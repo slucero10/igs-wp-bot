@@ -27,15 +27,17 @@ let art_info = new Object();
 
 export const Responses = Object.freeze({
   welcome: 'Muchas gracias por comunicarse con nosotros y su interés en nuestra &A exclusivo para clientes &C. &L elija una de las siguientes opciones:',
-  choose_option: 'Opción no válida, por favor elija una de las opciones del menú:',
-  menu: '\n1. Más información\n2. Costo de la asistencia\n3. Activar la asistencia\n4. Dejar de recibir información acerca de este servicio'
-    +'\n5. Dejar de recibir información de esta o cualquier otra asistencia\n6. Quiero que me contacten',
-  activate:'Para activar el servicio, acceda al PDF adjunto y haga clic en el botón de "Activar Asistencia". '
-    +'Una vez que sea redireccionado a nuestro sitio web, su asistencia ya se encontrará activada. '
-    +'Recuerde que al hacer clic en el botón, usted está aceptando las Condiciones del servicio que se encuentran detalladas en el PDF adjunto',
+  choose_option: 'Por favor elija una de las opciones del menú:',
+  menu: '\n\n1️⃣ Más información' + 
+  '\n2️⃣ Costo de la Asistencia' +
+  '\n3️⃣ Activar la Asistencia' +
+  '\n4️⃣ Quiero que me contacten' +
+  '\n5️⃣ Dejar de recibir información',
+  activate:'*Activar la Asistencia*\n\n✔️Para activar el servicio, acceda al PDF adjunto y de clic en el botón de *“Activar Asistencia”*, una vez que sea re direccionado a nuestro sitio web, su servicio de encontrará activado\n'+
+  '✔️ O comuníquese a este mismo número y un operador se pondrá en contacto con usted. Recuerde que, al hacer clic en el botón usted está aceptando las condiciones del servicio que se encuentran detalladas en el PDF adjunto',
   unsubscribe_service: 'Muchas gracias. A partir de ahora ya no recibirá más información acerca de este servicio',
   unsubscribed_service: 'Usted ya ha cancelado la suscripción a este servicio',
-  unsubscribe_number: 'Disculpe las molestias, a partir de ahora ya no recibirá más información de nuestras asistencias',
+  unsubscribe_number: 'Disculpe las molestias, a partir de ahora ya no recibirá más información acerca de nuestras asistencias',
   unsubscribed_number: 'Este número ya se encuentra fuera de nuestra base de datos',
   contact: 'Muchas gracias por contactarnos. Uno de nuestros operadores se comunicará con usted lo más pronto posible.',
   link: 'Puede activar su servicio haciendo clic en el siguiente enlace: ',
@@ -58,7 +60,7 @@ export async function generar_pdf(user, id, name) {
   };
 
   let html = readFileSync(art_info.html_path, 'utf8');
-  let URL = art_info.url_accept_assistance + user + '_' + id.replace('-', '');
+  let URL = art_info.url_accept_assistance + user + id.replace('-', '') + '_NM';
   if (art_info.product_name === 'FEMedicity' || art_info.product_name === 'FEFarmaciasEconomicas') {
     URL = URL + '&id_name=' + name;
   }
@@ -91,12 +93,12 @@ export function saludo(date) {
   if (hora > 18 && hora <= 24) {
     Saludo = 'Buenas noches';
   }
-  Saludo = Saludo + palabras[getRandomInt(0, 3)]; //
+  //Saludo = Saludo + palabras[getRandomInt(0, 3)];
   return Saludo;
 }
 
 export function mensaje() {
-  let mensaje = art_info.message[getRandomInt(0, art_info.message.length - 1)];
+  let mensaje = art_info.message[getRandomInt(0, art_info.message.length - 1)] + Responses.menu;
   while (mensaje.includes('\\c')) {
     mensaje = mensaje.replace('\\c', coma[getRandomInt(0, 1)])
   }
@@ -106,7 +108,7 @@ export function mensaje() {
   while (mensaje.includes('\\p')) {
     mensaje = mensaje.replace('\\p', puntuacion[getRandomInt(0, 1)])
   }
-  return mensaje + espacios[getRandomInt(0, 1)] + mensaje_activacion;
+  return mensaje + espacios[getRandomInt(0, 1)];
 }
 
 export function mensaje_random() {

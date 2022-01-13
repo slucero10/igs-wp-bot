@@ -36,14 +36,14 @@ import { appendFile } from "fs";
 dontenv.config();
 
 //Inicializar variables del Bot
-const campaign = Campaigns.ANDALUCIA;
-const product = campaign.products.AsistenciaSalud;
-const activePhones = ["15-S"];
-const startIndex = 2;
+const campaign = Campaigns.BGR;
+const product = campaign.products.Mascotas;
+const activePhones = ["1-A"];
+const startIndex = 0;
 const numEnvios = 150;
 const envio = true;
 const heatingLines = true;
-let firstMessage = false;
+let firstMessage = true;
 let pdfOnly = false;
 
 process.on('unhandledRejection', (reason, p) => {
@@ -222,7 +222,7 @@ async function firstChat(client, phoneName) {
     if (envio == true) {
       if (!pdfOnly) {
         await delay(time_message);
-        await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje());
+        await client.sendText(contact, `${saludo(start_t)} ${name} ` + mensaje());
       }
       //Genera pdf
       await generar_pdf("0", phoneName, name);
@@ -397,6 +397,10 @@ async function start(client, idActiveLine, phoneName, obj) {
   let hour = startdate.getHours();
   const message_received = `MENSAJE RECIBIDO [${phoneName}] Opcion emparejada: `;
   console.log(`${day}-${month}-${year}, ${hour}h`);
+  client.onIncomingCall(async (call) => {
+    console.log(`LLAMADA ENTRANTE [${phoneName}] ID: ${call.peerJid}`);
+    client.sendText(call.peerJid, "Por favor espere en la línea, un asesor se comunicará con usted pronto");
+  });
   client.onMessage(async (message) => {
     let name = message.sender.name;
     let searchInDB = await checkInDB(name);
@@ -409,76 +413,80 @@ async function start(client, idActiveLine, phoneName, obj) {
       let number = message.from.replace('593', '').replace('@c.us', '');
       let searchClient = await fetchClientByPhone(number);
       let user_info = searchClient['searchClientByPhone'];
-      if (await setSessionAndUser(message.from)) {
-        let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
-        //let response = payload.fulfillmentMessages[0].text.text[0];
-        switch (message.body) {
-          case '1':
-            for (let reply_message of product_info.info_messages) {
-              await delay(2000);
-              client.sendText(message.from, reply_message);
-            }
-            console.log(message_received + message.body);
-            break;
-          case '2':
+      //if (await setSessionAndUser(message.from)) {
+      await setSessionAndUser(message.from)
+      let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
+      //let response = payload.fulfillmentMessages[0].text.text[0];
+      switch (message.body) {
+        case '1':
+          for (let reply_message of product_info.info_messages) {
             await delay(2000);
-            client.sendText(message.from, product_info.cost_message);
-            console.log(message_received + message.body);
-            break;
-          case '3':
-            await delay(2000);
-            client.sendText(message.from, Responses.activate);
-            console.log(message_received + message.body);
-            break;
-          case '4':
-            await delay(2000);
-            let temp = await checkCampaignStatus(number, product);
-            let status = temp["searchCampaignStatus"];
-            if (status != null) {
-              if (status.assistance_status != WP_status.UNSUBSCRIBED) {
-                await updateCampaignStatus(number, product_info.product_name, WP_status.UNSUBSCRIBED, product);
-                client.sendText(message.from, Responses.unsubscribe_service);
-              } else {
-                client.sendText(message.from, Responses.unsubscribed_service);
-              }
-            } else {
+            client.sendText(message.from, reply_message);
+          }
+          console.log(message_received + message.body);
+          break;
+        case '2':
+          await delay(2000);
+          client.sendText(message.from, product_info.cost_message);
+          console.log(message_received + message.body);
+          break;
+        case '3':
+          await delay(2000);
+          client.sendText(message.from, Responses.activate);
+          console.log(message_received + message.body);
+          break;
+        /*case '4':
+          await delay(2000);
+          let temp = await checkCampaignStatus(number, product);
+          let status = temp["searchCampaignStatus"];
+          if (status != null) {
+            if (status.assistance_status != WP_status.UNSUBSCRIBED) {
               await updateCampaignStatus(number, product_info.product_name, WP_status.UNSUBSCRIBED, product);
               client.sendText(message.from, Responses.unsubscribe_service);
-            }
-            console.log(message_received + message.body);
-            break;
-          case '5':
-            await delay(2000);
-            let contact_temp = await checkContactStatus(number);
-            let contact_status = contact_temp["searchContactStatus"];
-            if (contact_status == WP_status.UNSUBSCRIBED) {
-              client.sendText(message.from, Responses.unsubscribed_number);
             } else {
-              await updateContactStatus(number, WP_status.UNSUBSCRIBED);
-              client.sendText(message.from, Responses.unsubscribe_number);
+              client.sendText(message.from, Responses.unsubscribed_service);
             }
-            console.log(message_received + message.body);
-            break;
-          case '6':
-            await delay(2000);
-            await updateCampaignStatus(number, product_info.product_name, WP_status.TO_CONTACT, product);
-            client.sendText(message.from, Responses.contact);
-            console.log(message_received + message.body);
-            break;
-          default:
-            let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
-            //let response = payload.fulfillmentMessages[0].text.text[0];
-            sendMenu(false, user_info, client, message.from);
-            console.log(message_received + "MENU");
-            break;
-        }
-      } else {
+          } else {
+            await updateCampaignStatus(number, product_info.product_name, WP_status.UNSUBSCRIBED, product);
+            client.sendText(message.from, Responses.unsubscribe_service);
+          }
+          console.log(message_received + message.body);
+          break;*/
+        case '4':
+          await delay(2000);
+          await updateCampaignStatus(number, product_info.product_name, WP_status.TO_CONTACT, product);
+          client.sendText(message.from, Responses.contact);
+          console.log(message_received + message.body);
+          break;
+
+        case '5':
+          await delay(2000);
+          let contact_temp = await checkContactStatus(number);
+          let contact_status = contact_temp["searchContactStatus"];
+          if (contact_status == WP_status.UNSUBSCRIBED) {
+            client.sendText(message.from, Responses.unsubscribed_number);
+          } else {
+            await updateContactStatus(number, WP_status.UNSUBSCRIBED);
+            client.sendText(message.from, Responses.unsubscribe_number);
+          }
+          console.log(message_received + message.body);
+          break;
+
+        default:
+          //let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
+          //let response = payload.fulfillmentMessages[0].text.text[0];
+          //sendMenu(false, user_info, client, message.from);
+          client.sendText(message.from, Responses.choose_option + Responses.menu);
+          console.log(message_received + "MENU");
+          break;
+      }
+      /*} else {
         let payload = await sendToDialogFlow(message.body, sessionIds.get(message.from), phoneName);
         //let response = payload.fulfillmentMessages[0].text.text[0];
         sendMenu(true, user_info, client, message.from);
         console.log(message_received + "FIRST_TIME_MENU");
       }
-      /*switch (response) {
+      switch (response) {
         case 'GET_INFO':
           for (let reply_message of product_info.info_messages) {
             await delay(getRandomInt(1000, 2000));
