@@ -41,8 +41,8 @@ const product = campaign.products.Mascotas;
 const activePhones = ["15-S"];
 const startIndex = 0;
 const numEnvios = 150;
-const envio = true;
-const heatingLines = false;
+const envio = false;
+const heatingLines = true;
 let firstMessage = false;
 let pdfOnly = true;
 
