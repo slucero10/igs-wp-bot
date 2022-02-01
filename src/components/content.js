@@ -51,6 +51,24 @@ export function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Return local time as a String, in 30 minute intervals (ex. 13:47 represented as 13:30)
+ * @return {Number}      The total of the two numbers
+ */
+function getCurrentTime() {
+  try{
+    let currDate = new Date();
+    let hour = currDate.getHours();
+    let minutesRaw = currDate.getMinutes();
+    let minutesExcess = minutesRaw % 30;
+    let minutes = minutesRaw - minutesExcess;
+    let minutesString = minutes.toString().length < 2 ? '0' + minutes.toString() : minutes.toString();
+    return hour.toString() + minutesString;
+  } catch (e){
+    console.log(e);
+  }
+}
+
 export async function generar_pdf(user, id, name) {
   let options = {
     height: art_info.height,
@@ -60,7 +78,7 @@ export async function generar_pdf(user, id, name) {
   };
 
   let html = readFileSync(art_info.html_path, 'utf8');
-  let URL = art_info.url_accept_assistance + user + id.replace('-', '') + '_NM';
+  let URL = art_info.url_accept_assistance + user + '_' + id.replace('-', '') + '_' + getCurrentTime();
   if (art_info.product_name === 'FEMedicity' || art_info.product_name === 'FEFarmaciasEconomicas') {
     URL = URL + '&id_name=' + name;
   }

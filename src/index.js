@@ -38,13 +38,13 @@ dontenv.config();
 //Inicializar variables del Bot
 const campaign = Campaigns.BGR;
 const product = campaign.products.Mascotas;
-const activePhones = ["1-A"];
+const activePhones = ["15-S"];
 const startIndex = 0;
 const numEnvios = 150;
 const envio = true;
-const heatingLines = true;
-let firstMessage = true;
-let pdfOnly = false;
+const heatingLines = false;
+let firstMessage = false;
+let pdfOnly = true;
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
@@ -57,7 +57,7 @@ connect();
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
-app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema(campaign.collection + 'Clients5') }));
+app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema('PruebaClients')}));
 app.listen(3000, () => console.log("Server on port 3000"));
 
 const log_date = new Date().toISOString().replace(/T.+/, '');
