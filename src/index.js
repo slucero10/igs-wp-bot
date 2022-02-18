@@ -41,8 +41,9 @@ const product = campaign.products.Mascotas;
 const activePhones = ["15-S"];
 const startIndex = 0;
 const numEnvios = 150;
-const envio = false;
-const heatingLines = true;
+const envio = true;
+const heatingLines = false;
+const reached_less_than = 3;
 let firstMessage = false;
 let pdfOnly = true;
 
@@ -57,7 +58,7 @@ connect();
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
-app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema('PruebaClients')}));
+app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema('PruebaClients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
 const log_date = new Date().toISOString().replace(/T.+/, '');
@@ -275,6 +276,7 @@ async function production(client, idActiveLine, phoneName, obj) {
     let identificacion = obj[index].identification;
     let name = getName(obj[index].name);
     let number = obj[index].phone;
+    let times_reached = 0;
     let campaign_status = null;
     let contact_st = null;
     if (obj[index].IGS_status != null) {
@@ -283,6 +285,9 @@ async function production(client, idActiveLine, phoneName, obj) {
       }
       if (obj[index].IGS_status.contact_status != undefined) {
         contact_st = obj[index].IGS_status.contact_status;
+      }
+      if (obj[index].IGS_status.wp_status[product].times_reached != undefined) {
+        times_reached = obj[index].IGS_status.wp_status[product].times_reached;
       }
     }
     if (number != null) {
@@ -305,7 +310,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         let time_message = time_delay / getRandomInt(3, 8);
         let time_end = getRandomInt(40000, 50000);
         if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE &&
-          contact_st != WP_status.UNSUBSCRIBED) {
+          contact_st != WP_status.UNSUBSCRIBED && times_reached <= reached_less_than) {
           if (!pdfOnly) {
             await delay(time_message);
             await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
