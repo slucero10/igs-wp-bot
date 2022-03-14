@@ -4,6 +4,8 @@ export const Campaigns = Object.freeze({
     name: 'Cooperativa de Ahorro y Crédito Andalucía',
     products: {
       AsistenciaSalud: 0,
+      AsistenciaMascotas: 1,
+      AsistenciaSaludAlcance: 2,
     },
     current_db: '',
   },
@@ -30,6 +32,7 @@ export const Campaigns = Object.freeze({
     products: {
       Mascotas: 0,
       CelularProtegido: 1,
+      Mujeres: 2,
     },
     current_db: '',
   },

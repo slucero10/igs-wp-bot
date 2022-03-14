@@ -25,7 +25,8 @@
     "phantomjs-prebuilt": "^2.1.16",
     "puppeteer": "^11.0.0",
     "random-words": "^1.1.2",
+    "sharp": "^0.30.2",
     "uuid": "^8.3.2",
-    "venom-bot": "^4.0.5"
+    "venom-bot": "^4.0.9"
   }
 }

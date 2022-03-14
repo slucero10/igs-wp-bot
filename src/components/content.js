@@ -116,7 +116,7 @@ export function saludo(date) {
 }
 
 export function mensaje() {
-  let mensaje = art_info.message[getRandomInt(0, art_info.message.length - 1)] + Responses.menu;
+  let mensaje = art_info.message[getRandomInt(0, art_info.message.length - 1)]; //+ Responses.menu;
   while (mensaje.includes('\\c')) {
     mensaje = mensaje.replace('\\c', coma[getRandomInt(0, 1)])
   }

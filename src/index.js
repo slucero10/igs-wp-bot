@@ -36,16 +36,16 @@ import { appendFile } from "fs";
 dontenv.config();
 
 //Inicializar variables del Bot
-const campaign = Campaigns.BGR;
-const product = campaign.products.Mascotas;
+const campaign = Campaigns.ANDALUCIA;
+const product = campaign.products.AsistenciaSaludAlcance;
 const activePhones = ["15-S"];
 const startIndex = 0;
 const numEnvios = 150;
 const envio = true;
-const heatingLines = false;
-const reached_less_than = 3;
-let firstMessage = false;
-let pdfOnly = true;
+const heatingLines = true;
+const reached_less_than = 3;//-1 para ignorar
+let firstMessage = true;
+let pdfOnly = false;
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
@@ -300,7 +300,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         .catch((error) => {
           contact_exists = false;
         });
-      if (contact_exists) {
+      if (contact_exists && campaign_status != WP_status.UNSUBSCRIBED) {
         num_existe++;
         console.log(
           `[${startIndex + index}] [${phoneName}] ${obj[index].name} telf:${contact} id:${identificacion} (Total si existen: ${num_existe})`
@@ -309,7 +309,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         let time_file = time_delay / getRandomInt(4, 10);
         let time_message = time_delay / getRandomInt(3, 8);
         let time_end = getRandomInt(40000, 50000);
-        if (envio == true && campaign_status != WP_status.UNSUBSCRIBED && campaign_status != WP_status.ACTIVE &&
+        if (envio == true && campaign_status != WP_status.ACTIVE &&
           contact_st != WP_status.UNSUBSCRIBED && times_reached <= reached_less_than) {
           if (!pdfOnly) {
             await delay(time_message);
@@ -357,7 +357,7 @@ async function production(client, idActiveLine, phoneName, obj) {
       } else {
         num_noexiste++;
         console.log(
-          `NO Index [${index}] ${obj[index].name} telf:${contact} (Total no existen: ${num_noexiste})`
+          `NO Index [${startIndex + index}] ${obj[index].name} telf:${contact} (Total no existen: ${num_noexiste})`
         );
         await updateContactStatus(number, WP_status.UNREACHABLE);
         await delay(1000);
