@@ -112,6 +112,9 @@ const clientSchema = new Schema(
     phone: {
       type: String,
     },
+    gender: {
+      type: String,
+    },
     IGS_status: {
       type: statusSchema,
     },

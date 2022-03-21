@@ -11,6 +11,7 @@ export function fetchClients(current_db, first, skip) {
           name
           identification
           phone
+          gender
           IGS_status {
             wp_status {
               name

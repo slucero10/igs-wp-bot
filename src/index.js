@@ -36,8 +36,8 @@ import { appendFile } from "fs";
 dontenv.config();
 
 //Inicializar variables del Bot
-const campaign = Campaigns.ANDALUCIA;
-const product = campaign.products.AsistenciaSaludAlcance;
+const campaign = Campaigns.BGR;
+const product = campaign.products.CelularProtegido;
 const activePhones = ["15-S"];
 const startIndex = 0;
 const numEnvios = 150;
@@ -205,8 +205,8 @@ async function lineHeating(client, idLine, lineName) {
 
 async function firstChat(client, phoneName) {
   let start_t = new Date();
-  let contact = "593" + "980535586" + "@c.us"; //980535586 andres  992900544 juan
-  let name = "ANDRES";
+  let contact = "593" + "983869883" + "@c.us"; //980535586 andres  992900544 juan
+  let name = "DENNYS";
   let contact_exists = null;
   await client.checkNumberStatus(contact)
     .then((result) => {
@@ -226,7 +226,7 @@ async function firstChat(client, phoneName) {
         await client.sendText(contact, `${saludo(start_t)} ${name} ` + mensaje());
       }
       //Genera pdf
-      await generar_pdf("0", phoneName, name);
+      await generar_pdf("0_D", phoneName, name);
       await delay(time_file);
       //Envía pdf
       await client

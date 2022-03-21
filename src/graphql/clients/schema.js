@@ -14,6 +14,7 @@ const typeDefs = `
     name: String
     identification: String
     phone: String
+    gender: String
     IGS_status: IGS_status
   }
 
