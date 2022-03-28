@@ -263,6 +263,7 @@ async function production(client, idActiveLine, phoneName, obj) {
   let num_noexiste = 0;
   let indexPhone = activePhones.indexOf(phoneName);
   let cont = 0;
+  let sent = 0;
   let startdate = new Date();
   for (
     let index = indexPhone;
@@ -300,6 +301,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         .catch((error) => {
           contact_exists = false;
         });
+        cont++;
       if (contact_exists && campaign_status != WP_status.UNSUBSCRIBED) {
         num_existe++;
         console.log(
@@ -341,12 +343,12 @@ async function production(client, idActiveLine, phoneName, obj) {
             phoneName,
             product
           );
-          cont++;
+          sent++;
           console.log(
             `Envío (${cont}) de ${phoneName} Terminado, esperando ${time_end / 1000}s para el próximo envío`
           );
           if (cont % 25 === 0 && cont !== 0) {
-            appendFile(`src/log_files/${log_date}.log`, `[${phoneName}] ${cont} mensajes enviados\n`, (err) => {
+            appendFile(`src/log_files/${log_date}.log`, `[${phoneName}] ${sent} mensajes enviados\n`, (err) => {
               if (err) throw err;
             });
           }
@@ -369,11 +371,11 @@ async function production(client, idActiveLine, phoneName, obj) {
   }
   const totalTime = (new Date() - startdate) / 60000;
   console.log(
-    `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: ${totalTime} minutos (${cont} mensajes enviados)`
+    `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: ${totalTime} minutos (${sent} mensajes enviados)`
   );
   if (envio) {
-    appendFile(`src/log_files/${log_date}.log`, `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: 
-    ${totalTime} minutos (${cont} mensajes enviados)\n`, (err) => {
+    appendFile(`src/log_files/${log_date}.log`, `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: `
+    + `${totalTime} minutos (${sent} mensajes enviados)\n`, (err) => {
       if (err) throw err;
     });
   }
