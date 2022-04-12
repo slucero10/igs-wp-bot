@@ -8,17 +8,18 @@ import {
   fetchClientByPhone,
   updateClient,
   updateCampaignStatus,
-  checkCampaignStatus,
   updateContactStatus,
   checkContactStatus
 } from "./graphql/clients/query.js";
 import { fetchPhones, checkInDB } from "./graphql/phones/query.js";
 import { fetchCampaign } from "./graphql/campaigns_info/query.js";
+import { createBackup } from "./graphql/chats/query.js";
 import { LineStatus } from "./graphql/phones/models/Phone.js";
 import { WP_status } from "./graphql/clients/models/Clients.js";
 import phoneSchema from "./graphql/phones/schema.js";
 import { serverSchema } from "./graphql/clients/schema.js";
 import campaignSchema from "./graphql/campaigns_info/schema.js";
+import chatsSchema from "./graphql/chats/schema.js"
 import {
   generar_pdf,
   saludo,
@@ -58,6 +59,7 @@ connect();
 //Uso de GraphQL
 app.use("/api/phones", graphqlHTTP({ graphiql: true, schema: phoneSchema }));
 app.use("/api/campaigns", graphqlHTTP({ graphiql: true, schema: campaignSchema }));
+app.use("/api/chats", graphqlHTTP({ graphiql: true, schema: chatsSchema }));
 app.use("/api/clients", graphqlHTTP({ graphiql: true, schema: serverSchema('PruebaClients') }));
 app.listen(3000, () => console.log("Server on port 3000"));
 
@@ -240,12 +242,8 @@ async function firstChat(client, phoneName) {
           //console.log('Result: ', result); //return object success
         })
         .catch((error) => {
-          //console.error('Error when sending: ', error); //return object error
+          console.error('Error when sending: ', error); //return object error
         });
-      //await delay(time_message);
-      //await client.sendText(contact, `${saludo(start_t)} ${name}` + '. ' + mensaje());
-      //Mensaje Completo
-      //await client.sendText(contact, mensaje());
       console.log("Primer envío completado");
       await delay(time_end);
     } else {
@@ -301,7 +299,7 @@ async function production(client, idActiveLine, phoneName, obj) {
         .catch((error) => {
           contact_exists = false;
         });
-        cont++;
+      cont++;
       if (contact_exists && campaign_status != WP_status.UNSUBSCRIBED) {
         num_existe++;
         console.log(
@@ -332,10 +330,8 @@ async function production(client, idActiveLine, phoneName, obj) {
               //console.log('Result: ', result); //return object success
             })
             .catch((error) => {
-              //console.error('Error when sending: ', error); //return object error
+              console.error('Error when sending: ', error); //return object error
             });
-          //await delay(time_message);
-          //await client.sendText(contact, `${saludo(start_t)} ${name}. ` + mensaje());
           updateClient(
             obj[index]._id,
             product_info.product_name,
@@ -343,6 +339,7 @@ async function production(client, idActiveLine, phoneName, obj) {
             phoneName,
             product
           );
+          //createBackup(phoneName, client);
           sent++;
           console.log(
             `Envío (${cont}) de ${phoneName} Terminado, esperando ${time_end / 1000}s para el próximo envío`
@@ -375,9 +372,9 @@ async function production(client, idActiveLine, phoneName, obj) {
   );
   if (envio) {
     appendFile(`src/log_files/${log_date}.log`, `ENVIOS TERMINADOS >> [${phoneName}] Tiempo de Ejecución: `
-    + `${totalTime} minutos (${sent} mensajes enviados)\n`, (err) => {
-      if (err) throw err;
-    });
+      + `${totalTime} minutos (${sent} mensajes enviados)\n`, (err) => {
+        if (err) throw err;
+      });
   }
   await delay(getRandomInt(600000, 900000));
 }
